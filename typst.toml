@@ -1,0 +1,11 @@
+[package]
+name = "radishom"
+version = "0.1.0"
+entrypoint = "src/lib.typ"
+authors = ["QuadnucYard"]
+license = "MIT"
+description = "Draw elegant metro maps with ease"
+categories = ["visualization"]
+keywords = ["metro", "subway", "map"]
+repository = "https://github.com/QuadnucYard/radishom.typ"
+exclude = ["examples"]
