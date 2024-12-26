@@ -12,8 +12,23 @@
   south-west: "SW",
 )
 
+#let anchors = ("south", "north-west", "west", "south-west")
+
+
 #let pin(x: auto, y: auto, dx: auto, dy: auto, d: auto, pin: none) = {
   (x: x, y: y, dx: dx, dy: dy, d: d, pin: pin)
+}
+
+#let ensure-transfer(transfer) = {
+  if transfer == auto {
+    auto
+  } else if transfer == none {
+    ()
+  } else if type(transfer) == str {
+    (transfer,)
+  } else {
+    transfer
+  }
 }
 
 #let station(
@@ -28,29 +43,21 @@
   offset: (0, 0),
   anchor: auto,
   hidden: false,
-  transfer: none,
+  transfer: auto,
   pin: none,
 ) = {
   if id == auto {
-    id = if type(name) == str {
-      name
-    } else {
-      name.text
-    }
+    id = if type(name) == str { name } else { name.text }
   }
   (
     id: id,
     name: name,
     subname: subname,
-    x: x,
-    y: y,
-    dx: dx,
-    dy: dy,
-    r: r,
+    raw-pos: (x: x, y: y, dx: dx, dy: dy, r: r),
     offset: offset,
     anchor: anchor,
     hidden: hidden,
-    transfer: transfer,
+    transfer: ensure-transfer(transfer),
     pin: pin,
   )
 }
@@ -113,29 +120,19 @@
   end-pos
 }
 
-#let ensure-transfer(transfer) = {
-  if transfer == none {
-    ()
-  } else if type(transfer) == str {
-    (transfer,)
-  } else {
-    transfer
-  }
-}
-
 #let line(number: "1", color: blue, index: auto, ..points) = {
   let points = points.pos()
   assert(points.len() >= 2, message: "The metro line must have at least two points!")
   // assert(type(points.at(0)) == array, message: "The first point must be position!")
   // assert(type(points.at(-1)) == array, message: "The last point must be position!")
 
-  let last-point = points.at(0) // unresolved point
-  let last-pos = last-point // resolved point
+  let last-pos = points.at(0) // resolved point
   let control-points = ((last-pos.x, last-pos.y),)
   let segments = ()
-  let i = 0 // index of control point
-  while i + 1 < points.len() {
-    let j = i + 1
+  let stations = ()
+  let i = 1 // index of control point
+  while i < points.len() {
+    let j = i
     while "id" in points.at(j) {
       j += 1
     }
@@ -143,154 +140,170 @@
 
     let end-pos = resolve-moved(cur-point, last-pos, cur-point.d)
 
-    let seg-start = (last-pos.x, last-pos.y)
-    let seg-end = (end-pos.x, end-pos.y)
-    segments.push((
-      start: seg-start,
-      end: seg-end,
-      stations: points
-        .slice(i + 1, j)
-        .map(t => (
-          t + (segment: (start: seg-start, end: seg-end), transfer: ensure-transfer(t.transfer))
-        )),
-    ))
+    let seg = (
+      start: (last-pos.x, last-pos.y),
+      end: (end-pos.x, end-pos.y),
+      range: (start: stations.len(), end: stations.len() + j - i),
+    )
+
+    let (sx, sy) = seg.start
+    let (tx, ty) = seg.end
+    let angle = calc.atan2(tx - sx, ty - sy)
+    let q = calc.rem(int((angle + 22.5deg + 180deg) / 45.0deg), 4)
+
+    // process stations on this segment
+    for sta in points.slice(i, j) {
+      sta.segment = seg
+      if sta.anchor == auto {
+        sta.anchor = anchors.at(q)
+      }
+
+      let (x, y, r, dx, dy) = sta.remove("raw-pos")
+      if x == auto and dx != auto {
+        x = sx + dx
+      }
+      if y == auto and dy != auto {
+        y = sy + dy
+      }
+      if r != auto {
+        x = lerp(sx, tx, r)
+        y = lerp(sy, ty, r)
+      } else if x == auto and y != auto {
+        x = (y - sy) / (ty - sy) * (tx - sx) + sx
+      } else if y == auto and x != auto {
+        y = (x - sx) / (tx - sx) * (ty - sy) + sy
+      } else if x == auto or y == auto {
+        // handle it later
+        sta.pos = auto
+        stations.push(sta)
+        continue
+      }
+      assert(x != auto and y != auto)
+      sta.pos = (x, y)
+      stations.push(sta)
+    }
+
+    segments.push(seg)
     last-pos = end-pos
-    control-points.push(seg-end)
-    i = j
+    control-points.push(seg.end)
+    i = j + 1
   }
 
-  // 自动给终点站设置位置
-  if segments.first().stations.len() > 0 {
-    segments.first().stations.first().x = segments.first().start.at(0)
-    segments.first().stations.first().y = segments.first().start.at(1)
+  // Set positions for terminal stations
+  if stations.len() > 0 {
+    if stations.first().pos == auto {
+      stations.first().pos = stations.first().segment.start
+    }
+    if stations.last().pos == auto {
+      stations.last().pos = stations.last().segment.end
+    }
   }
-  if segments.last().stations.len() > 0 {
-    segments.last().stations.last().x = segments.last().end.at(0)
-    segments.last().stations.last().y = segments.last().end.at(1)
-  }
-
-  (number: number, color: color, index: index, control-points: control-points, segments: segments)
+  (number: number, color: color, index: index, control-points: control-points, segments: segments, stations: stations)
 }
 
 #let find-intersection(lines, line, sta) = {
   if sta.transfer.len() == 0 {
     return none
   }
+  // find stations of the same id
   for line2 in lines {
-    for seg2 in line2.segments {
-      for sta2 in seg2.stations {
-        if sta2.id == sta.id and line.number in sta2.transfer {
-          let intersection = cetz.intersection.line-line(
-            sta.segment.start,
-            sta.segment.end,
-            sta2.segment.start,
-            sta2.segment.end,
-          )
-          if intersection != none {
-            return intersection.slice(0, 2)
-          }
-        }
+    if line2.number not in sta.transfer { continue }
+    for sta2 in line2.stations {
+      if sta2.id != sta.id { continue }
+      let intersection = cetz.intersection.line-line(
+        sta.segment.start,
+        sta.segment.end,
+        sta2.segment.start,
+        sta2.segment.end,
+      )
+      if intersection != none {
+        return intersection.slice(0, 2)
       }
     }
   }
   return none
 }
 
-#let resolve-stations(lines) = {
-  let anchors = ("south", "north-west", "west", "south-west")
-  for (i, line) in lines.enumerate() {
-    let stations = ()
-    for (j, seg) in line.segments.enumerate() {
-      let (sx, sy) = seg.start
-      let (tx, ty) = seg.end
-      let angle = calc.atan2(tx - sx, ty - sy)
-      let q = calc.rem(int((angle + 22.5deg + 180deg) / 45.0deg), 4)
-
-      let seg-stations = ()
-      for (k, sta) in seg.stations.enumerate() {
-        if sta.anchor == auto {
-          sta.anchor = anchors.at(q)
-        }
-
-        let x = sta.remove("x")
-        let y = sta.remove("y")
-        let r = sta.remove("r")
-        let dx = sta.remove("dx")
-        let dy = sta.remove("dy")
-        if x == auto and dx != auto {
-          x = sx + dx
-        }
-        if y == auto and dy != auto {
-          y = sy + dy
-        }
-        if r != auto {
-          x = lerp(sx, tx, r)
-          y = lerp(sy, ty, r)
-        } else if x == auto and y != auto {
-          x = (y - sy) / (ty - sy) * (tx - sx) + sx
-        } else if y == auto and x != auto {
-          y = (x - sx) / (tx - sx) * (ty - sy) + sy
-        } else if x == auto or y == auto {
-          // find transfer station with the same name on another line
-          let intersection = find-intersection(lines, line, sta)
-          if intersection != none {
-            (x, y) = intersection
-          } else {
-            sta.pos = none
-            seg-stations.push(sta)
-            continue
-          }
-        }
-        sta.pos = (x, y)
-        seg-stations.push(sta)
-
-        // handle pin
-        // if type(sta.pin) == str {
-        //   state("metro-pin-" + sta.pin).update((x: x, y: y))
-        // }
+#let get-transfers(self, station-id, lines) = {
+  let transfer = ()
+  for line2 in lines {
+    if line2.number == self.number { continue }
+    for sta2 in line2.stations {
+      if sta2.id == station-id {
+        transfer.push(line2.number)
       }
-
-      // resolve pending positions
-      let last-known-index = -1
-      let last-known = (sx, sy)
-      for (k, sta) in seg-stations.enumerate() {
-        if sta.pos == none {
-          assert(not (j == 0 and k == 0), message: repr(sta))
-          // find next known
-          let next-known = (tx, ty)
-          let next-known-index = seg-stations.len()
-          for kk in range(k + 1, seg-stations.len()) {
-            if seg-stations.at(kk).pos != none {
-              next-known = seg-stations.at(kk).pos
-              next-known-index = kk
-              break
-            }
-          }
-          sta.pos = cetz.vector.lerp(
-            last-known,
-            next-known,
-            (k - last-known-index) / (next-known-index - last-known-index),
-          )
-        } else {
-          last-known-index = k
-          last-known = sta.pos
-        }
-        seg-stations.at(k) = sta
-      }
-
-      stations += seg-stations
     }
-    // lines.at(i).remove("segments")
-    if line.index == auto {
-      lines.at(i).index = i
-    }
-    lines.at(i).stations = stations
   }
-  return lines
+  return transfer
 }
 
-#let diagram(canvas-length: 1cm, grid: none, line-width: 6pt, corner-radius: 8pt, ..lines) = {
-  let lines = resolve-stations(lines.pos())
+#let resolve-stations(lines) = {
+  (lines.enumerate()).map(((i, line)) => {
+    // set line index
+    if line.index == auto {
+      line.index = i
+    }
+    for (k, sta) in line.stations.enumerate() {
+      // resolve station transfer
+      if sta.transfer == auto {
+        sta.transfer = get-transfers(line, sta.id, lines)
+        line.stations.at(k).transfer = sta.transfer
+      }
+      // resolve station positions by intersection
+      if sta.pos == auto {
+        // find transfer station with the same name on another line
+        let intersection = find-intersection(lines, line, sta)
+        if intersection != none {
+          sta.pos = intersection
+          line.stations.at(k).pos = sta.pos
+        }
+      }
+    }
+
+    // resolve pending positions by interpolation
+    for seg in line.segments {
+      let start-idx = seg.range.start
+      let end-idx = seg.range.end
+
+      let last-known-index = -1
+      let last-known = seg.start
+
+      for (k, sta) in line.stations.slice(start-idx, end-idx).enumerate() {
+        if sta.pos != auto {
+          last-known-index = k
+          last-known = sta.pos
+          continue
+        }
+        // find next known
+        let next-known = seg.end
+        let next-known-index = end-idx - start-idx
+        for kk in range(k + 1, end-idx - start-idx) {
+          let kkk = start-idx + kk
+          if line.stations.at(kkk).pos != auto {
+            next-known = line.stations.at(kkk).pos
+            next-known-index = kk
+            break
+          }
+        }
+        let pos = cetz.vector.lerp(
+          last-known,
+          next-known,
+          (k - last-known-index) / (next-known-index - last-known-index),
+        )
+        line.stations.at(start-idx + k).pos = pos
+      }
+    }
+
+    return line
+  })
+}
+
+#let metro(..lines) = {
+  (lines: resolve-stations(lines.pos()))
+}
+
+#let diagram(metro, canvas-length: 1cm, grid: none, line-width: 6pt, corner-radius: 8pt) = {
+  let lines = metro.lines
   cetz.canvas(
     length: canvas-length,
     {
@@ -349,9 +362,7 @@
           if hidden {
             label = hide(label)
           }
-          if pos.at(0) == auto {
-            panic(sta)
-          }
+          assert(pos != auto and pos.at(0) != auto, message: repr(sta))
 
           draw.on-layer(2, draw.content(pos, label, anchor: sta.anchor))
         }

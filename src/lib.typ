@@ -1,1 +1,1 @@
-#import "radishom.typ": dirs, pin, station, line, diagram
+#import "radishom.typ": dirs, pin, station, line, metro, diagram
