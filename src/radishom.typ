@@ -198,7 +198,22 @@
       stations.last().pos = stations.last().segment.end
     }
   }
-  (number: number, color: color, index: index, control-points: control-points, segments: segments, stations: stations)
+  let station-indexer = stations.enumerate().map(((i, sta)) => (sta.id, i)).to-dict()
+  (
+    number: number,
+    color: color,
+    index: index,
+    control-points: control-points,
+    segments: segments,
+    stations: stations,
+    station-indexer: station-indexer,
+  )
+}
+
+#let get-station-by-id(line, sta-id) = {
+  if sta-id in line.station-indexer {
+    return line.stations.at(line.station-indexer.at(sta-id))
+  }
 }
 
 #let find-intersection(lines, line, sta) = {
@@ -208,8 +223,8 @@
   // find stations of the same id
   for line2 in lines {
     if line2.number not in sta.transfer { continue }
-    for sta2 in line2.stations {
-      if sta2.id != sta.id { continue }
+    let sta2 = get-station-by-id(line2, sta.id)
+    if sta2 != none {
       let intersection = cetz.intersection.line-line(
         sta.segment.start,
         sta.segment.end,
@@ -228,13 +243,27 @@
   let transfer = ()
   for line2 in lines {
     if line2.number == self.number { continue }
-    for sta2 in line2.stations {
-      if sta2.id == station-id {
-        transfer.push(line2.number)
-      }
+    if get-station-by-id(line2, station-id) != none {
+      transfer.push(line2.number)
     }
   }
   return transfer
+}
+
+#let get-transfer-marker-pos(station-id, lines) = {
+  let pos = (0, 0)
+  let cnt = 0
+  for line in lines {
+    let sta = get-station-by-id(line, station-id)
+    if sta != none {
+      pos = cetz.vector.add(pos, sta.pos)
+      cnt += 1
+    }
+  }
+  if cnt > 0 {
+    pos = cetz.vector.div(pos, cnt)
+  }
+  return pos
 }
 
 #let resolve-stations(lines) = {
@@ -327,7 +356,7 @@
           let hidden = (
             sta.hidden
               or sta.transfer.any(tr => lines.any(line2 => (
-                line2.number == tr and line2.index < line.index and line2.stations.any(sta2 => sta2.id == sta.id)
+                line2.number == tr and line2.index < line.index and get-station-by-id(line2, sta.id) != none
               )))
           )
 
@@ -339,7 +368,8 @@
 
           if not hidden {
             let marker = if sta.transfer.len() > 0 {
-              draw.circle(pos, fill: white, stroke: black + 1pt, radius: 6pt)
+              let marker-pos = get-transfer-marker-pos(sta.id, lines)
+              draw.circle(marker-pos, fill: white, stroke: black + 1pt, radius: 6pt)
             } else if j == 0 or j == line.stations.len() - 1 {
               draw.circle(pos, fill: white, stroke: line.color + 1.0pt, radius: 4pt)
             } else {
@@ -349,7 +379,7 @@
           }
 
           let label = [
-            #show: block.with(inset: 0.6em)
+            #show: block.with(inset: (x: 0.6em, y: 0.4em))
             #set par(spacing: 0.2em)
             #set align(if "west" in sta.anchor {
               left
