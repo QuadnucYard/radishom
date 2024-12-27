@@ -631,7 +631,7 @@
 )
 
 #let nj-metro = metro(..lines)
-#diagram(nj-metro, canvas-length: 2.0cm, grid: ((-24, -21), (25, 17)))
+#diagram(nj-metro, canvas-length: 2.0cm)
 
 #let metro-query(lines, name: none) = {
   for line in lines {

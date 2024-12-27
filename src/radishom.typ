@@ -302,16 +302,17 @@
   (lines: resolve-stations(lines.pos()))
 }
 
-#let diagram(metro, canvas-length: 1cm, grid: none, line-width: 6pt, corner-radius: 8pt) = {
+#let diagram(metro, canvas-length: 1cm, grid: auto, line-width: 6pt, corner-radius: 8pt) = {
   let lines = metro.lines
   cetz.canvas(
     length: canvas-length,
     {
       import cetz: draw
 
-      if grid != none {
-        draw.on-layer(-100, draw.grid(..grid, stroke: gray.transparentize(50%)))
-      }
+      let min-x = 0
+      let min-y = 0
+      let max-x = 0
+      let max-y = 0
 
       for line in lines {
         draw.line(
@@ -331,6 +332,10 @@
           )
 
           let pos = sta.pos
+          min-x = calc.min(min-x, pos.at(0))
+          min-y = calc.min(min-y, pos.at(1))
+          max-x = calc.max(max-x, pos.at(0))
+          max-y = calc.max(max-y, pos.at(1))
 
           if not hidden {
             let marker = if sta.transfer.len() > 0 {
@@ -366,6 +371,13 @@
 
           draw.on-layer(2, draw.content(pos, label, anchor: sta.anchor))
         }
+      }
+
+      if grid == auto {
+        grid = ((calc.floor(min-x - 0.5), calc.floor(min-y - 0.5)), (calc.ceil(max-x + 0.5), calc.ceil(max-y + 0.5)))
+      }
+      if grid != none {
+        draw.on-layer(-100, draw.grid(..grid, stroke: gray.transparentize(50%)))
       }
     },
   )
