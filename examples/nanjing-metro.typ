@@ -98,7 +98,7 @@
     station([羊山公园], [YANGSHANGONGYUAN], x: 13.),
     pin(x: 13.5, d: dirs.north-east),
     station([南大仙林校区], [NJU Xianlin Campus], x: 14.),
-    station([经天路], [JINGTIANLU]),
+    station([经天路], [JINGTIANLU], x: 16.),
     pin(x: 16., d: dirs.east),
     // pin(x: 17.4, d: dirs.east),
     // station([仙林湖], [XIANLINHU]),
@@ -517,8 +517,9 @@
     number: "S5",
     color: rgb("#f5df4d"),
     pin(x: 17.5, y: 8.),
+    station([仙林湖], []),
     pin(dy: 2., d: dirs.north),
-    station([摄山], []),
+    station([摄山], [], dx: 0.5),
     pin(dx: 1.5, d: dirs.east),
     station([江乘], []),
     station([龙潭], [], dx: 1.25),
@@ -630,15 +631,5 @@
   ),
 )
 
-#let nj-metro = metro(..lines)
-#diagram(nj-metro, canvas-length: 2.0cm)
-
-#let metro-query(lines, name: none) = {
-  for line in lines {
-    for sta in line.stations {
-      if sta.id == name {
-        (sta,)
-      }
-    }
-  }
-}
+#let nj-metro = metro(lines)
+#radishom(nj-metro, canvas-length: 2.0cm)
