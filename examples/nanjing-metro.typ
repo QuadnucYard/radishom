@@ -8,13 +8,15 @@
   line(
     number: "1",
     color: rgb("#009ace"),
-    pin(x: 5., y: 11.),
+
+    pin(x: 5., y: 11., cfg: "L1-N"),
     station([八卦洲大桥南], [BAGUAZHOUDAQIAONAN]),
     station([笆斗山], [BADOUSHAN], x: 3.),
     pin(x: 2., d: dirs.west),
     station([燕子矶], [YANZIJI], y: 10.),
     station([吉祥庵], [JIXIANG'AN]),
     station([晓庄], [XIAOZHUANG], anchor: "south-west"),
+    pin(y: 7., d: dirs.south, cfg: none),
     station([迈皋桥], [MAIGAOQIAO], y: 7.),
     pin(y: 6.5, d: dirs.south),
     station([红山动物园], [HONGSHAN ZOO], y: 6.25),
@@ -57,21 +59,23 @@
   line(
     number: "2",
     color: rgb("#a6093d"),
-    pin(x: -11., y: -8.5),
+
+    pin(x: -11., y: -8.5, cfg: "L2-W"),
     station([鱼嘴], [YUZUI]),
     station([天保街], [TIAOBAOJIE]),
     station([青莲街], [QINGLIANJIE], anchor: "north"),
     station([螺塘路], [LUOTANGLU], anchor: "north-west"),
     pin(x: -7.5, d: dirs.east),
-    station([油坊桥], [YOUFANGQIAO], anchor: "west"),
-    pin(x: -5.75, y: -6.75, d: dirs.north-east),
+    pin(x: -6.75, y: -7.75, d: dirs.north-east, cfg: none),
+    station([油坊桥], [YOUFANGQIAO], x: -6.75, anchor: "west"),
+    pin(x: -5.75, d: dirs.north-east),
     station([雨润大街], [YUANTONG], y: -6., anchor: "north-east"),
-    pin(x: -7., y: -5.5, d: dirs.north-west),
+    pin(x: -7., d: dirs.north-west),
     station([元通], [YUANTONG], anchor: "west"),
     station([奥体东], [OLYMPIC STADIUM EAST]),
     station([兴隆大街], [XINGLONGDAJIE], r: 1.0, anchor: "west"),
-    pin(x: -4.5, y: -3, d: dirs.north-east),
-    station([集庆门大街], [XINGLONGDAJIE], y: -2),
+    pin(x: -4.5, d: dirs.north-east),
+    station([集庆门大街], [XINGLONGDAJIE], y: -2, cfg-not: "no-jqmdj"),
     pin(y: -1, d: dirs.north),
     station([云锦路], [YUNJINLU]),
     pin(x: -3.5, d: dirs.east),
@@ -99,14 +103,16 @@
     pin(x: 13.5, d: dirs.north-east),
     station([南大仙林校区], [NJU Xianlin Campus], x: 14.),
     station([经天路], [JINGTIANLU], x: 16.),
-    pin(x: 16., d: dirs.east),
-    // pin(x: 17.4, d: dirs.east),
-    // station([仙林湖], [XIANLINHU]),
-    // pin(y: 8., d: dirs.north),
+    pin(x: 16., d: dirs.east, cfg: "L2-EE"),
+    pin(x: 16., y: 7.5),
+    pin(x: 17.4, d: dirs.east),
+    station([仙林湖], [XIANLINHU]),
+    pin(y: 8., d: dirs.north),
   ),
   line(
     number: "3",
     color: rgb("#009a44"),
+
     pin(x: -11, y: 12.),
     station([林场], [LINCHANG]),
     station([星火路], [XINGHUOLU], x: -9.5),
@@ -149,15 +155,17 @@
     pin(x: 3., d: dirs.east),
     station([诚信大道], [CHENGXINDADAO], y: -15., anchor: "south-east"),
     station([东大九龙湖校区], [SEU JIULONGHU CAMPUS]),
-    station([秣周东路], [MOZHOUDONGLU]),
-    station([上秦淮西], [SHANGQINHUAIXI]),
+    station([秣周东路], [MOZHOUDONGLU], r: 1.),
+    pin(y: -17., d: dirs.south, cfg: "3-3"),
+    station([上秦淮西], [SHANGQINHUAIXI], r: 0.5),
     station([秣陵], [MOLING]),
     pin(y: -19., d: dirs.south),
   ),
   line(
     number: "4",
     color: rgb("#7d55c7"),
-    pin(x: -10.5, y: 8.),
+
+    pin(x: -10.5, y: 8., cfg: "L4-2"),
     station([珍珠泉东], [ZHENZHUQUANDONG]),
     station([瑞龙郊野公园], [RUILONGJIAOYEGONGYUAN]),
     pin(x: -11.5, y: 7.),
@@ -167,7 +175,7 @@
     station([江北市民中心], [JIANGBEISHIMINZHONGXIN], y: 5.25, anchor: "west"),
     station([江心洲尾], [JIANGXINZHOUWEI], y: 2.5),
     pin(x: -6.5, y: 2.),
-    pin(x: -5., y: 2.),
+    pin(x: -5., y: 2., cfg: none),
     station([龙江], [LONGJIANG], anchor: "south-west"),
     station([草场门], [CAOCHANGMEN], anchor: "south-west"),
     station([云南路], [YUNNANLU], anchor: "south-west"),
@@ -200,7 +208,9 @@
   line(
     number: "5",
     color: rgb("#fdda24"),
-    pin(x: -4.5, y: 7.),
+    optional: true,
+
+    pin(x: -4.5, y: 7., cfg: "L5-N"),
     station([方家营], [FANGJIAYING]),
     station([南京西站], [NANJINGXIZHAN], anchor: "south-east"),
     pin(y: 5.75, d: dirs.south-west),
@@ -229,8 +239,9 @@
     station([神机营], [SHENJIYING], y: -7.),
     pin(y: -7.5, d: dirs.south),
     pin(y: -8., d: dirs.south-east),
-    station([东山香樟园], [DONGSHANXIANGZHANGYUAN]),
-    station([文靖路], [WENJINGLU]),
+    station([东山香樟园], [DONGSHANXIANGZHANGYUAN], r: .5),
+    pin(y: -10., d: dirs.south, cfg: "L5-S"),
+    station([文靖路], [WENJINGLU], r: 0.),
     station([东山], [DONGSHAN]),
     station([新亭路], [XINTINGLU]),
     station([竹山路], [ZHUSHANLU]),
@@ -247,6 +258,8 @@
   line(
     number: "6",
     color: rgb("#4bbbb4"),
+    optional: true,
+
     pin(x: 1. + 0.05, y: -8. + 0.1),
     station([南京南站], [NANJING SOUTH RAILWAY STATION], x: 1.),
     pin(x: 3.5, d: dirs.east),
@@ -284,7 +297,10 @@
   line(
     number: "7",
     color: rgb("#4a7729"),
-    pin(x: 10., y: 9.),
+    optional: true,
+    features: ("L7-full": ("L7-N", "L7-S", "L7-M")),
+
+    pin(x: 10., y: 9., cfg: "L7-N"),
     station([仙新路], [XIANXINLU]),
     station([尧化门], [YAOHUAMEN]),
     station([尧化新村], [YAOHUAXINCUN]),
@@ -298,7 +314,8 @@
     pin(x: -1., d: dirs.west),
     station([五塘广场], [WUTANGGUANGCHANG]),
     pin(x: -1.5, d: dirs.south-west),
-    station([幕府西路], [MUFUXILU], anchor: "east", y: 7.),
+    station([幕府西路], [MUFUXILU], r: 1., anchor: "east"),
+    pin(y: 7., d: dirs.south, cfg: "L7-M"),
     station([钟阜路], [ZHONGFULU], anchor: "south-east"),
     pin(y: 5.5, d: dirs.south),
     station([福建路], [FUJIANLU]),
@@ -309,8 +326,8 @@
     station([莫愁湖], [MOCHOUHU]),
     station([大士茶亭], [DASHICHATING]),
     station([南湖], [NANHU]),
+    pin(y: -3, d: dirs.south, cfg: "L7-S"),
     station([应天大街], [YINGTIANDAJIE], y: -3),
-    pin(y: -3, d: dirs.south),
     station([梦都大街东], [MENGDUDAJIEDONG]),
     station([新城科技园], [XINCHENGKEJIYUAN]),
     station([中胜], [ZHONGSHENG], anchor: "west"),
@@ -324,6 +341,8 @@
   line(
     number: "9",
     color: rgb("#fa4616"),
+    optional: true,
+
     pin(x: 3. - 0.1, y: 6.),
     station([红山新城], [HONGSHANXINCHENG]),
     pin(y: 5., d: dirs.south),
@@ -353,6 +372,8 @@
   line(
     number: "10",
     color: rgb("#b9975b"),
+    optional: true,
+
     pin(x: -16.5, y: 2.),
     station([雨山路], [YUSHANLU]),
     station([文德路], [WENDELU]),
@@ -393,6 +414,8 @@
   line(
     number: "11",
     color: rgb("#ef426f"),
+    optional: true,
+
     pin(x: -5., y: 12.5),
     station([浦洲路], [PUZHOULU]),
     station([柳洲东路], [LIUZHOUDONGLU]),
@@ -420,6 +443,8 @@
   line(
     number: "S1",
     color: rgb("#4bbbb4"),
+    optional: true,
+
     pin(x: 1. + 0.05, y: -8 + 0.1),
     station([南京南站], [NANJING SOUTH RAILWAY STATION]),
     pin(dx: -0.75, d: dirs.west),
@@ -438,6 +463,8 @@
   line(
     number: "S2",
     color: rgb("#ab2328"),
+    optional: true,
+
     pin(x: -10., y: -10.),
     station([西善桥], [XISHANQIAO]),
     station([雨花经济开发区], []),
@@ -461,6 +488,8 @@
   line(
     number: "S3",
     color: rgb("#b06c96"),
+    optional: true,
+
     pin(x: 1. + 0.05, y: -8),
     station([南京南站], []),
     station([景明佳园], [], x: -0.5),
@@ -490,6 +519,8 @@
   line(
     number: "S4",
     color: rgb("#ff661f"),
+    optional: true,
+
     pin(x: -13., y: 14.),
     station([汊河], []),
     station([汊河新城], [], dx: -0.75),
@@ -516,6 +547,8 @@
   line(
     number: "S5",
     color: rgb("#f5df4d"),
+    optional: true,
+
     pin(x: 17.5, y: 8.),
     station([仙林湖], []),
     pin(dy: 2., d: dirs.north),
@@ -544,6 +577,8 @@
   line(
     number: "S6",
     color: rgb("#c98bdb"),
+    optional: true,
+
     pin(x: 9.5, y: 1.),
     station([马群], []),
     station([百水桥], [], x: 11.),
@@ -573,6 +608,8 @@
   line(
     number: "S7",
     color: rgb("#e89cae"),
+    optional: true,
+
     pin(x: 2.5, y: -20.),
     station([空港新城江宁], []),
     pin(dx: 1.25, d: dirs.east),
@@ -590,11 +627,13 @@
   line(
     number: "S8",
     color: rgb("#ea7600"),
-    pin(x: -6.25, y: 9.75),
+    optional: true,
+
+    pin(x: -6.25, y: 9.75, cfg: "S8-N"),
     station([长江大桥北], []),
     station([毛纺厂路], []),
-    station([泰山新村], [], r: 1.0),
-    pin(dy: 1.25, d: dirs.north-west),
+    pin(dy: 1.25, d: dirs.north-west, cfg: none),
+    station([泰山新村], [], r: 0.0, anchor: "south-west"),
     station([泰冯路], []),
     station([高新开发区], []),
     station([信息工程大学], []),
@@ -617,6 +656,8 @@
   line(
     number: "S9",
     color: rgb("#f1b434"),
+    optional: true,
+
     pin(x: -0.5, y: -19.),
     station([翔宇路南], []),
     pin(dx: -0.1, d: dirs.south-west),
@@ -631,5 +672,37 @@
   ),
 )
 
-#let nj-metro = metro(lines)
-#radishom(nj-metro, canvas-length: 2.0cm)
+#let nj-metro = metro(
+  lines,
+  features: (
+    "phase-1": ("L:1", "L:2", "L:3", "L:4", "L:10", "L:S1", "L:S8"),
+    "phase-2": (
+      "L1-N",
+      "L2-W",
+      "L:5",
+      "L:6",
+      "L:7",
+      "L:9",
+      "L:11",
+      "L:S2",
+      "L:S3",
+      "L:S4",
+      "L:S5",
+      "L:S6",
+      "L:S7",
+      "L:S9",
+    ),
+    "phase-3": ("L2-EE",),
+    "built": ("phase-1", "L1-N", "L2-W", "L:5", "L:6", "L:7", "L7-full", "L:S3", "L:S4", "L:S6", "L:S7", "L:S9"),
+    "progress": ("L:6", "L:9", "L:11"),
+    "futures": (),
+  ),
+  default-features: ("phase-1", "phase-2"),
+)
+#let nj-radish = radish(
+  nj-metro,
+  default-features: true,
+  // features: ("phase-1", "built", "L2-EE", "no-jqmdj", "L5-S", "L5-N", "L7-N", "L7-S"),
+  enable-all: true,
+)
+#radishom(nj-radish, canvas-length: 2.0cm)

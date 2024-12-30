@@ -1,46 +1,45 @@
 #import "deps.typ": cetz
-#import "line.typ": get-station-by-id
+#import "line.typ": get-segment-of-station, get-station-by-id
 
 
-#let find-intersection(lines, line, sta) = {
-  if sta.transfer.len() == 0 {
-    return none
+#let get-line-by-id(metro, line-num) = {
+  let index = metro.line-indexer.at(line-num, default: none)
+  if index != none {
+    return metro.lines.at(index)
   }
+}
+
+#let get-line-station-by-id(metro, line-num, station-id) = {
+  let line = get-line-by-id(metro, line-num)
+  if line != none {
+    get-station-by-id(line, station-id)
+  } else {
+    none
+  }
+}
+
+#let find-intersection(metro, line, sta) = {
   // find stations of the same id
-  for line2 in lines {
-    if line2.number not in sta.transfer { continue }
+  let seg = get-segment-of-station(line, sta)
+  for line-num in metro.transfers.at(sta.id) {
+    if line-num == line.number { continue }
+    let line2 = get-line-by-id(metro, line-num)
     let sta2 = get-station-by-id(line2, sta.id)
-    if sta2 != none {
-      let intersection = cetz.intersection.line-line(
-        sta.segment.start,
-        sta.segment.end,
-        sta2.segment.start,
-        sta2.segment.end,
-      )
-      if intersection != none {
-        return intersection.slice(0, 2)
-      }
+    let seg2 = get-segment-of-station(line2, sta2)
+    let intersection = cetz.intersection.line-line(seg.start, seg.end, seg2.start, seg2.end)
+    if intersection != none {
+      intersection.pop()
+      return intersection
     }
   }
   return none
 }
 
-#let get-transfers(self, station-id, lines) = {
-  let transfer = ()
-  for line2 in lines {
-    if line2.number == self.number { continue }
-    if get-station-by-id(line2, station-id) != none {
-      transfer.push(line2.number)
-    }
-  }
-  return transfer
-}
-
-#let get-transfer-marker-pos(station-id, lines) = {
+#let get-transfer-marker-pos(metro, station-id) = {
   let pos = (0, 0)
   let cnt = 0
-  for line in lines {
-    let sta = get-station-by-id(line, station-id)
+  for line-num in metro.transfers.at(station-id) {
+    let sta = get-line-station-by-id(metro, line-num, station-id)
     if sta != none {
       pos = cetz.vector.add(pos, sta.pos)
       cnt += 1
@@ -52,22 +51,33 @@
   return pos
 }
 
-#let resolve-stations(lines) = {
-  (lines.enumerate()).map(((i, line)) => {
+#let resolve-transfers(lines) = {
+  let station-collection = (:) // station-id -> {line-number}
+  for line in lines {
+    for station in line.stations {
+      if station.transfer != none {
+        if station.id not in station-collection {
+          station-collection.insert(station.id, ())
+        }
+        station-collection.at(station.id).push(line.number)
+      }
+    }
+  }
+  station-collection = station-collection.pairs().filter(((k, v)) => v.len() > 1).to-dict()
+  return station-collection
+}
+
+#let resolve-stations(metro) = {
+  (metro.lines.enumerate()).map(((i, line)) => {
     // set line index
     if line.index == auto {
       line.index = i
     }
     for (k, sta) in line.stations.enumerate() {
-      // resolve station transfer
-      if sta.transfer == auto {
-        sta.transfer = get-transfers(line, sta.id, lines)
-        line.stations.at(k).transfer = sta.transfer
-      }
       // resolve station positions by intersection
-      if sta.pos == auto {
+      if sta.pos == auto and sta.transfer != none and sta.id in metro.transfers {
         // find transfer station with the same name on another line
-        let intersection = find-intersection(lines, line, sta)
+        let intersection = find-intersection(metro, line, sta)
         if intersection != none {
           sta.pos = intersection
           line.stations.at(k).pos = sta.pos
@@ -105,6 +115,7 @@
           next-known,
           (k - last-known-index) / (next-known-index - last-known-index),
         )
+        let xx = (sta.id, pos)
         line.stations.at(start-idx + k).pos = pos
       }
     }
@@ -113,6 +124,16 @@
   })
 }
 
-#let metro(lines) = {
-  (lines: resolve-stations(lines))
+#let metro(lines, features: (:), default-features: ()) = {
+  let transfers = resolve-transfers(lines)
+  let line-indexer = lines.enumerate().map(((i, line)) => (line.number, i)).to-dict()
+  let mtr = (
+    lines: lines,
+    line-indexer: line-indexer,
+    transfers: transfers,
+    features: features,
+    default-features: default-features,
+  )
+  mtr.lines = resolve-stations(mtr)
+  mtr
 }

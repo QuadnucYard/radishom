@@ -1,15 +1,5 @@
+#import "utils.typ": make-array
 
-#let ensure-transfer(transfer) = {
-  if transfer == auto {
-    auto
-  } else if transfer == none {
-    ()
-  } else if type(transfer) == str {
-    (transfer,)
-  } else {
-    transfer
-  }
-}
 
 #let station(
   name,
@@ -25,6 +15,8 @@
   hidden: false,
   transfer: auto,
   pin: none,
+  cfg: none,
+  cfg-not: none,
 ) = {
   if id == auto {
     id = if type(name) == str { name } else { name.text }
@@ -37,7 +29,9 @@
     offset: offset,
     anchor: anchor,
     hidden: hidden,
-    transfer: ensure-transfer(transfer),
+    transfer: transfer,
     pin: pin,
+    cfg: cfg,
+    cfg-not: cfg-not,
   )
 }
