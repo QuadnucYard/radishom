@@ -707,4 +707,4 @@
   // features: ("phase-1", "built", "L2-EE", "no-jqmdj", "L5-S", "L5-N", "L7-N", "L7-S"),
   enable-all: true,
 )
-#radishom(nj-radish, canvas-length: 2.0cm)
+#radishom(nj-radish, unit-length: 2.0cm)
