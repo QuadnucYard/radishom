@@ -2,14 +2,14 @@
 
 
 #let dirs = (
-  north: "N",
-  south: "S",
-  west: "W",
-  east: "E",
-  north-east: "NE",
-  north-west: "NW",
-  south-east: "SE",
-  south-west: "SW",
+  N: "north",
+  S: "south",
+  W: "west",
+  E: "east",
+  NW: "north-west",
+  NE: "north-east",
+  SW: "south-west",
+  SE: "south-east",
 )
 
 #let anchors = ("south", "north-west", "west", "south-west")
@@ -21,11 +21,11 @@
 
 #let resolve-moved(end-pos, last-pos, dir) = {
   if end-pos.x == auto {
-    end-pos.x = if dir == dirs.east or dir == dirs.west {
+    end-pos.x = if dir == dirs.E or dir == dirs.W {
       last-pos.x + end-pos.dx
-    } else if dir == dirs.north or dir == dirs.south {
+    } else if dir == dirs.N or dir == dirs.S {
       last-pos.x
-    } else if dir == dirs.north-east or dir == dirs.south-west {
+    } else if dir == dirs.NE or dir == dirs.SW {
       let dx = if end-pos.dx != auto {
         end-pos.dx
       } else if end-pos.dy != auto {
@@ -34,7 +34,7 @@
         end-pos.y - last-pos.y
       }
       last-pos.x + dx
-    } else if dir == dirs.south-east or dir == dirs.north-west {
+    } else if dir == dirs.SE or dir == dirs.NW {
       let dx = if end-pos.dx != auto {
         end-pos.dx
       } else if end-pos.dy != auto {
@@ -48,11 +48,11 @@
     }
   }
   if end-pos.y == auto {
-    end-pos.y = if dir == dirs.north or dir == dirs.south {
+    end-pos.y = if dir == dirs.N or dir == dirs.S {
       last-pos.y + end-pos.dy
-    } else if dir == dirs.east or dir == dirs.west {
+    } else if dir == dirs.E or dir == dirs.W {
       last-pos.y
-    } else if dir == dirs.north-east or dir == dirs.south-west {
+    } else if dir == dirs.NE or dir == dirs.SW {
       let dy = if end-pos.dy != auto {
         end-pos.dy
       } else if end-pos.dx != auto {
@@ -61,7 +61,7 @@
         end-pos.x - last-pos.x
       }
       last-pos.y + dy
-    } else if dir == dirs.south-east or dir == dirs.north-west {
+    } else if dir == dirs.SE or dir == dirs.NW {
       let dy = if end-pos.dy != auto {
         end-pos.dy
       } else if end-pos.dx != auto {
@@ -79,8 +79,6 @@
 
 #let extract-stations(points, line-num) = {
   assert(points.len() >= 2, message: "The metro line must have at least two points!")
-  // assert(type(points.at(0)) == array, message: "The first point must be position!")
-  // assert(type(points.at(-1)) == array, message: "The last point must be position!")
 
   let last-pin = points.at(0) // resolved point
   let cur-cfg = last-pin.cfg

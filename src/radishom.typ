@@ -64,6 +64,7 @@
           let label = [
             #show: block.with(inset: (x: 0.6em, y: 0.4em))
             #set par(spacing: 0.2em)
+            #set smartquote(enabled: false)
             #set align(if "west" in sta.anchor {
               left
             } else if "east" in sta.anchor {
