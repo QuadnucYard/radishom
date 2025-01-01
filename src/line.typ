@@ -1,16 +1,6 @@
+#import "dir.typ": dirs
 #import "utils.typ": lerp
 
-
-#let dirs = (
-  N: "north",
-  S: "south",
-  W: "west",
-  E: "east",
-  NW: "north-west",
-  NE: "north-east",
-  SW: "south-west",
-  SE: "south-east",
-)
 
 #let anchors = ("south", "north-west", "west", "south-west")
 

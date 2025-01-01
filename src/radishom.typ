@@ -28,82 +28,79 @@
   backend: "cetz",
   unit-length: 1cm,
   grid: auto,
-  line-width: 6pt,
-  corner-radius: 8pt,
   line-stroker: auto,
   marker-renderer: auto,
   label-renderer: auto,
 ) = {
-  let (backend, canvas, draw) = if backend == "cetz" {
+  let backend = if backend == "cetz" {
     import "backends/cetz.typ" as cetz-be
-    (cetz-be, cetz.canvas, cetz.draw)
+    cetz-be
+  } else if backend == "std" {
+    import "backends/std.typ" as std-be
+    std-be
+  } else {
+    panic("unknown backend: " + backend)
   }
   if line-stroker == auto { line-stroker = default-line-stroke }
   if marker-renderer == auto { marker-renderer = backend.default-marker-renderer }
   if label-renderer == auto { label-renderer = default-label-renderer }
 
-  canvas(
-    length: unit-length,
-    {
-      let min-x = 0
-      let min-y = 0
-      let max-x = 0
-      let max-y = 0
+  // render task
+  let task = (lines: (), markers: (), labels: ())
 
-      for line in metro.lines {
-        if line.disabled {
-          continue
-        }
-        for cp in line.sections {
-          if not cp.disabled {
-            draw.line(..cp.points, stroke: line-stroker(line))
-          }
-        }
+  let (min-x, min-y, max-x, max-y) = (0, 0, 0, 0)
 
-        // draw stations
-        for (j, sta) in line.stations.enumerate() {
-          if sta.disabled {
-            continue
-          }
+  for line in metro.lines {
+    if line.disabled {
+      continue
+    }
 
-          let has-transfer = sta.id in metro.enabled-transfers
-          let is-not-first-transfer = has-transfer and line.number != metro.enabled-transfers.at(sta.id).at(0)
+    let line-stroke = line-stroker(line)
+    for sec in line.sections {
+      if not sec.disabled {
+        task.lines.push((points: sec.points, stroke: line-stroke))
+      }
+    }
 
-          //check marker
-          let hidden = sta.hidden or is-not-first-transfer
-
-          let pos = sta.pos
-          assert(pos != auto and pos.at(0) != auto, message: repr(sta))
-          min-x = calc.min(min-x, pos.at(0))
-          min-y = calc.min(min-y, pos.at(1))
-          max-x = calc.max(max-x, pos.at(0))
-          max-y = calc.max(max-y, pos.at(1))
-
-          if not hidden {
-            let marker-pos = if has-transfer {
-              get-transfer-marker-pos(metro, sta.id)
-            } else {
-              pos
-            }
-            let marker = marker-renderer(line, sta, pos: marker-pos, has-transfer: has-transfer)
-            draw.on-layer(1, marker)
-          }
-
-          let label = label-renderer(sta)
-          if hidden {
-            label = hide(label)
-          }
-
-          draw.on-layer(2, draw.content(pos, label, anchor: sta.anchor))
-        }
+    // draw stations
+    for (j, sta) in line.stations.enumerate() {
+      if sta.disabled {
+        continue
       }
 
-      if grid == auto {
-        grid = ((calc.floor(min-x - 0.5), calc.floor(min-y - 0.5)), (calc.ceil(max-x + 0.5), calc.ceil(max-y + 0.5)))
+      let has-transfer = sta.id in metro.enabled-transfers
+      let is-not-first-transfer = has-transfer and line.number != metro.enabled-transfers.at(sta.id).at(0)
+
+      //check marker
+      let hidden = sta.hidden or is-not-first-transfer
+
+      let pos = sta.pos
+      assert(pos != auto and pos.at(0) != auto, message: repr(sta))
+      min-x = calc.min(min-x, pos.at(0))
+      min-y = calc.min(min-y, pos.at(1))
+      max-x = calc.max(max-x, pos.at(0))
+      max-y = calc.max(max-y, pos.at(1))
+
+      if not hidden {
+        let marker-pos = if has-transfer {
+          get-transfer-marker-pos(metro, sta.id)
+        } else {
+          pos
+        }
+        let marker = marker-renderer(line, sta, has-transfer: has-transfer)
+        task.markers.push((pos: marker-pos, body: marker))
       }
-      if grid != none {
-        draw.on-layer(-100, draw.grid(..grid, stroke: gray.transparentize(50%)))
-      }
-    },
-  )
+
+      let label = label-renderer(sta)
+      task.labels.push((pos: pos, body: label, anchor: sta.anchor, hidden: hidden))
+    }
+  }
+
+  task.show-grid = grid != none
+  if grid == auto or grid == none {
+    grid = ((calc.floor(min-x - 0.5), calc.floor(min-y - 0.5)), (calc.ceil(max-x + 0.5), calc.ceil(max-y + 0.5)))
+  }
+  task.grid = (coords: grid, stroke: gray.transparentize(50%))
+
+  backend.render(task, unit-length)
 }
