@@ -5,8 +5,29 @@
 #let anchors = ("south", "north-west", "west", "south-west")
 
 
-#let pin(x: auto, y: auto, dx: auto, dy: auto, d: auto, pin: none, cfg: auto, cfg-not: auto) = {
-  (x: x, y: y, dx: dx, dy: dy, d: d, pin: pin, end: end, cfg: cfg, cfg-not: cfg-not)
+#let pin(
+  x: auto,
+  y: auto,
+  dx: auto,
+  dy: auto,
+  d: auto,
+  pin: none,
+  cfg: auto,
+  cfg-not: auto,
+  corner-radius: none,
+) = {
+  (
+    x: x,
+    y: y,
+    dx: dx,
+    dy: dy,
+    d: d,
+    pin: pin,
+    end: end,
+    cfg: cfg,
+    cfg-not: cfg-not,
+    corner-radius: corner-radius,
+  )
 }
 
 #let resolve-moved(end-pos, last-pos, dir) = {
@@ -71,17 +92,21 @@
   assert(points.len() >= 2, message: "The metro line must have at least two points!")
 
   let last-pin = points.at(0) // resolved point
-  let cur-cfg = last-pin.cfg
-  let cur-cfg-not = last-pin.cfg-not
+  let cur-cfg = if last-pin.cfg == auto { none } else { last-pin.cfg }
+  let cur-cfg-not = if last-pin.cfg-not == auto { none } else { last-pin.cfg-not }
+
+  let sections = ()
+  let section-points = ((last-pin.x, last-pin.y),)
   let segments = ()
   let stations = ()
+
   let i = 1 // index of control point
   while i < points.len() {
     let j = i
     while "id" in points.at(j) {
       j += 1 // skip stations
     }
-    let cur-point = points.at(j)
+    let cur-point = points.at(j) // a pin
 
     let end-pos = resolve-moved(cur-point, last-pin, cur-point.d)
 
@@ -89,8 +114,8 @@
       start: (last-pin.x, last-pin.y),
       end: (end-pos.x, end-pos.y),
       range: (start: stations.len(), end: stations.len() + j - i),
-      cfg: if cur-cfg == auto { none } else { cur-cfg },
-      cfg-not: if cur-cfg-not == auto { none } else { cur-cfg-not },
+      cfg: cur-cfg,
+      cfg-not: cur-cfg-not,
     )
 
     let (sx, sy) = seg.start
@@ -119,20 +144,14 @@
         x = (y - sy) / (ty - sy) * (tx - sx) + sx
       } else if y == auto and x != auto {
         y = (x - sx) / (tx - sx) * (ty - sy) + sy
-      } else if x == auto or y == auto {
-        // handle it later
-        sta.line = line-num
-        sta.pos = auto
-        stations.push(sta)
-        continue
       }
-      assert(x != auto and y != auto)
       sta.line = line-num
-      sta.pos = (x, y)
+      sta.pos = if x == auto or y == auto { auto } else { (x, y) } // mark pos auto, handle it later
       stations.push(sta)
     }
-
     segments.push(seg)
+
+    // update current pin and cfg
     last-pin = end-pos
     if last-pin.cfg != auto {
       cur-cfg = last-pin.cfg
@@ -140,22 +159,22 @@
     if last-pin.cfg-not != auto {
       cur-cfg-not = last-pin.cfg-not
     }
+
+    // add section point
+    section-points.push(if end-pos.corner-radius == none {
+      seg.end
+    } else {
+      (seg.end, end-pos.corner-radius)
+    })
+    if seg.cfg != cur-cfg or seg.cfg-not != cur-cfg-not {
+      sections.push((points: section-points, cfg: seg.cfg))
+      section-points = (seg.end,)
+    }
+
     i = j + 1
   }
-
-  // collect sections, split by features
-  let sections = ()
-  i = 0
-  while i < segments.len() {
-    let cfg = segments.at(i).cfg
-    let cp = (segments.at(i).start, segments.at(i).end)
-    let j = i
-    while j < segments.len() and segments.at(j).cfg == cfg {
-      cp.push(segments.at(j).end)
-      j += 1
-    }
-    sections.push((points: cp, cfg: cfg))
-    i = j
+  if section-points.len() > 0 {
+    sections.push((points: section-points, cfg: cur-cfg))
   }
 
   // Set positions for terminal stations

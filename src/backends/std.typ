@@ -1,3 +1,4 @@
+#import "../deps.typ": cetz
 #import "../dir.typ": dirs
 
 
@@ -26,13 +27,13 @@
 }
 
 /// Get the position on the canvas.
-#let _canvas-pos(pos, u) = {
+#let _cpos(pos, u) = {
   (pos.at(0) * u, -pos.at(1) * u)
 }
 
 /// Place an element on the canvas with given position.
 #let _draw(element, pos, u) = {
-  let (x, y) = _canvas-pos(pos, u)
+  let (x, y) = _cpos(pos, u)
   place(element, dx: x, dy: y)
 }
 
@@ -42,6 +43,33 @@
     #rect(width: u, height: u, stroke: grid.stroke)
   ]
   _draw(rect(fill: pat, width: 100%, height: 100%), (x1, y2), u)
+}
+
+#let _make-curved(points, u) = {
+  let extract(pt) = {
+    if type(pt.at(0)) == array { pt.at(0) } else { pt }
+  }
+
+  for (i, pt) in points.enumerate() {
+    if type(pt.at(0)) == array {
+      let (pt, radius) = pt
+      let p1 = extract(points.at(i - 1))
+      let p2 = extract(points.at(i + 1))
+      let d1 = cetz.vector.dist(p1, pt)
+      let d2 = cetz.vector.dist(p2, pt)
+      let radius = calc.min(radius, d1 / 2, d2 / 2) // clamp radius
+      let p1x = cetz.vector.lerp(pt, p1, radius / d1) // arc point 1
+      let p2x = cetz.vector.lerp(pt, p2, radius / d2) // arc point 2
+      let p1m = cetz.vector.lerp(pt, p1x, 0.5)
+      let p2m = cetz.vector.lerp(pt, p2x, 0.5)
+      (
+        (_cpos(p1x, u), (0pt, 0pt), _cpos(cetz.vector.sub(p1m, p1x), u)),
+        (_cpos(p2x, u), _cpos(cetz.vector.sub(p2m, p2x), u), (0pt, 0pt)),
+      )
+    } else {
+      (_cpos(pt, u),)
+    }
+  }
 }
 
 #let default-marker-renderer(line, station, has-transfer: false) = {
@@ -62,11 +90,8 @@
   }
 
   for line in task.lines {
-    show: place
-    path(
-      ..line.points.map(pt => _canvas-pos(pt, unit-length)),
-      stroke: line.stroke,
-    )
+    let points = _make-curved(line.points, unit-length)
+    place(path(..points, stroke: line.stroke))
   }
 
   for marker in task.markers {
