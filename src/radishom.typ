@@ -20,6 +20,7 @@
     #station.name
 
     #text(0.5em, station.subname)
+    // #text(0.5em)[(#calc.round(station.pos.at(0), digits: 1), #calc.round(station.pos.at(1), digits: 1))]
   ]
 }
 
