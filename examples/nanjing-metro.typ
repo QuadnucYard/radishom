@@ -2,8 +2,6 @@
 
 #set page(width: auto, height: auto)
 
-#set text(font: "Microsoft YaHei")
-
 #let (N, S, W, E, NW, NE, SW, SE) = dirs
 
 #let corner-radius = 0.2
@@ -15,14 +13,14 @@
     color: rgb("#009ace"),
 
     pin(x: 5., y: 11., cfg: "L1-N"),
-    station([八卦洲大桥南], [BAGUAZHOUDAQIAONAN]),
+    station([八卦洲大桥南], [BAGUAZHOUDAQIAONAN], anchor: W, logo-anchor: S),
     station([笆斗山], [BADOUSHAN], x: 3.),
     pin-round(x: 2., d: W),
     station([燕子矶], [YANZIJI], y: 10.),
     station([吉祥庵], [JIXIANG'AN]),
     station([晓庄], [XIAOZHUANG], anchor: SW),
     pin(y: 7., d: S, cfg: none),
-    station([迈皋桥], [MAIGAOQIAO], y: 7.),
+    station([迈皋桥], [MAIGAOQIAO], y: 7., logo-anchor: SE),
     pin-round(y: 6.5, d: S),
     station([红山动物园], [HONGSHAN ZOO], y: 6.1),
     station([南京站], [NANJING RAILWAY STATION], anchor: E),
@@ -58,7 +56,7 @@
     pin-round(x: 7.5, d: E),
     station([南医大·江苏经贸学院], [NMU/JIETT]),
     station([南京交院], [NJCI]),
-    station([中国药科大学], [CPU]),
+    station([中国药科大学], [CPU], logo-anchor: NW),
     pin(y: -15., d: SE),
   ),
   line(
@@ -66,18 +64,18 @@
     color: rgb("#a6093d"),
 
     pin(x: -12., y: -8.5, cfg: "L2-W"),
-    station([鱼嘴], [YUZUI]),
+    station([鱼嘴], [YUZUI], logo-anchor: E),
     station([天保街], [TIAOBAOJIE]),
     station([青莲街], [QINGLIANJIE], anchor: N),
     station([螺塘路], [LUOTANGLU], anchor: NW),
     pin-round(x: -7.5 + 0.2, d: E),
     pin(x: -6.75 + 0.2, y: -7.75, d: NE, cfg: none),
-    station([油坊桥], [YOUFANGQIAO], x: -6.75 + 0.1, anchor: W),
+    station([油坊桥], [YOUFANGQIAO], r: 0, anchor: W, logo-anchor: NE),
     pin-round(x: -5.75, d: NE),
     station([雨润大街], [YUANTONG], y: -6.25, anchor: NE),
     pin-round(x: -6.75, d: NW),
     station([元通], [YUANTONG], anchor: W),
-    station([奥体东], [OLYMPIC STADIUM EAST]),
+    station([奥体东], [OLYMPIC STADIUM EAST], y: -4.),
     pin-round(x: -4.5, d: NE),
     station([兴隆大街], [XINGLONGDAJIE], y: -3., anchor: W),
     station([集庆门大街], [XINGLONGDAJIE], y: -2, cfg-not: "no-jqmdj"),
@@ -108,10 +106,10 @@
     station([羊山公园], [YANGSHANGONGYUAN], x: 14.0),
     pin-round(y: 7., d: NE),
     station([南大仙林校区], [NJU Xianlin Campus], x: 15.5),
-    station([经天路], [JINGTIANLU], x: 17.),
+    station([经天路], [JINGTIANLU], x: 17., logo-anchor: NW),
     pin(x: 17., d: E, cfg: "L2-EE"),
     pin-round(x: 18.4, d: E),
-    station([仙林湖], [XIANLINHU]),
+    station([仙林湖], [XIANLINHU], anchor: E),
     pin(y: 8., d: N),
   ),
   line(
@@ -119,7 +117,7 @@
     color: rgb("#009a44"),
 
     pin(x: -11, y: 12.),
-    station([林场], [LINCHANG]),
+    station([林场], [LINCHANG], logo-anchor: N),
     station([星火路], [XINGHUOLU], x: -9.5),
     station([东大成贤学院], [SEU CHENGXIAN COLLEGE], anchor: N),
     station([泰冯路], [TAIFENGLU], anchor: SW),
@@ -159,10 +157,10 @@
     pin-round(x: 3., d: E),
     station([诚信大道], [CHENGXINDADAO], y: -15., anchor: SE),
     station([东大九龙湖校区], [SEU JIULONGHU CAMPUS]),
-    station([秣周东路], [MOZHOUDONGLU], r: 1.),
+    station([秣周东路], [MOZHOUDONGLU], r: 1., logo-anchor: E),
     pin(y: -17., d: S, cfg: "3-3"),
     station([上秦淮西], [SHANGQINHUAIXI], r: 0.5),
-    station([秣陵], [MOLING]),
+    station([秣陵], [MOLING], logo-anchor: E),
     pin(y: -19., d: S),
   ),
   line(
@@ -170,7 +168,7 @@
     color: rgb("#7d55c7"),
 
     pin(x: -12., y: 13., cfg: "L4-3"),
-    station([余家营], []),
+    station([余家营], [], logo-anchor: E),
     station([南京北站], []),
     station([护国村], [], y: 11.0),
     pin-round(y: 10.75, d: S),
@@ -178,7 +176,7 @@
     station([龙之谷], []),
     pin-round(y: 8.5, d: S),
     pin(x: -10.75, d: SW, cfg: "L4-2"),
-    station([珍珠泉东], [ZHENZHUQUANDONG], r: 0.),
+    station([珍珠泉东], [ZHENZHUQUANDONG], r: 0., logo-anchor: SE),
     station([瑞龙郊野公园], [RUILONGJIAOYEGONGYUAN]),
     pin-round(y: 7.25, d: SW),
     station([石佛寺], [SHIFOSI], y: 7.),
@@ -188,7 +186,7 @@
     station([江心洲尾], [JIANGXINZHOUWEI], y: 2.5),
     pin-round(x: -6.5, y: 2.),
     pin(x: -5., y: 2., cfg: none),
-    station([龙江], [LONGJIANG], anchor: SW),
+    station([龙江], [LONGJIANG], anchor: SW, logo-anchor: E),
     station([草场门], [CAOCHANGMEN], anchor: SW),
     station([云南路], [YUNNANLU], anchor: SW),
     station([鼓楼], [GULOU]),
@@ -214,9 +212,9 @@
     station([孟北], [MENGBEI], x: 18.25),
     pin-round(dx: 1.0, d: NE),
     station([西岗桦墅], [XIGANGHUASHU], dy: 0.75),
-    station([仙林湖], [XIANLINHU]),
     pin-round(y: 7.0, d: N),
-    pin-round(dx: -0.4, d: W),
+    pin-round(dx: -0.4, d: NW),
+    station([仙林湖], [XIANLINHU], logo-anchor: W),
     pin(y: 8., d: N),
   ),
   line(
@@ -225,7 +223,7 @@
     optional: true,
 
     pin(x: -4.5, y: 7., cfg: "L5-N"),
-    station([方家营], [FANGJIAYING]),
+    station([方家营], [FANGJIAYING], logo-anchor: S),
     station([南京西站], [NANJINGXIZHAN], anchor: SE),
     pin-round(y: 5.75, d: SW),
     station([静海寺], [JINGHAISI], dy: -0.25, anchor: E),
@@ -248,7 +246,7 @@
     station([光华门], [GUANGHUAMEN], anchor: SW),
     pin-round(x: 4.5, d: E),
     station([石门坎], [SHIMENKAN]),
-    station([七桥瓮], [QIQIAOWENG], y: -4.),
+    station([七桥瓮], [QIQIAOWENG], y: -4., anchor: NW),
     station([大校场], [DAJIAOCHANG], anchor: NW),
     station([神机营], [SHENJIYING], y: -7.),
     station([东山香樟园], [DONGSHANXIANGZHANGYUAN], y: -9.),
@@ -264,7 +262,7 @@
     pin-round(x: 2.5, d: W),
     pin-round(y: -16., d: S),
     station([九龙湖南], [JIULONGHUNAN], x: 1.),
-    station([吉印大道], [JIYINDADAO], anchor: SW),
+    station([吉印大道], [JIYINDADAO], anchor: SW, logo-anchor: E),
     pin(x: -0.5, d: W),
   ),
   line(
@@ -303,7 +301,7 @@
     pin-round(x: 10.5, d: E),
     pin-round(dy: 0.5, d: N),
     station([金陵石化], [JINLINGSHIHUA], x: 11.5),
-    station([栖霞山], [QIXIASHAN]),
+    station([栖霞山], [QIXIASHAN], logo-anchor: NW),
     pin(x: 13.5, d: E),
   ),
   line(
@@ -313,7 +311,7 @@
     features: ("L7-full": ("L7-N", "L7-S", "L7-M")),
 
     pin(x: 10., y: 9., cfg: "L7-N"),
-    station([仙新路], [XIANXINLU]),
+    station([仙新路], [XIANXINLU], logo-anchor: SW),
     station([尧化门], [YAOHUAMEN]),
     station([尧化新村], [YAOHUAXINCUN]),
     station([丁家庄南], [DINGJIAZHUANGNAN], y: 6.5),
@@ -352,7 +350,7 @@
     pin-round(y: -8., d: SW),
     station([螺塘路], [LUOTANGLU]),
     pin-round(y: -9.5 + 0.14, d: S),
-    station([西善桥], [XISHANQIAO]),
+    station([西善桥], [XISHANQIAO], logo-anchor: SE),
     pin(y: -10. + 0.07, d: SW),
   ),
   line(
@@ -397,7 +395,7 @@
     pin-round(x: 10.75, d: SW),
     station([仙新路], []),
     pin-round(x: 9.5, d: NW),
-    station([十月广场], []),
+    station([十月广场], [], logo-anchor: NE),
     pin(y: 10., d: N),
   ),
   line(
@@ -406,7 +404,7 @@
     optional: true,
 
     pin(x: 3. - 0.1, y: 6.),
-    station([红山新城], [HONGSHANXINCHENG]),
+    station([红山新城], [HONGSHANXINCHENG], logo-anchor: NE),
     pin-round(y: 5., d: S),
     station([红山路], [HONGSHANLU], x: 2.),
     pin-round(x: 1.5 - 0.15, d: W),
@@ -428,7 +426,7 @@
     station([上新河], [SHANGXINHE], anchor: W),
     station([绿博园], [LÜBOYUAN], anchor: W),
     pin-round(dx: -1., d: SW),
-    station([江苏大剧院·宪法公园], [JSCPA/XIANFAGONGYUAN], r: 1.0, anchor: E),
+    station([江苏大剧院·宪法公园], [JSCPA/XIANFAGONGYUAN], r: 1.0, anchor: E, logo-anchor: NE),
     pin(y: -3.0, d: S, cfg: "L9-2"),
     pin-round(y: -4.0, d: S),
     station([棉花堤], []),
@@ -444,14 +442,14 @@
     pin-round(y: -9.0, d: S),
     station([足球小镇], []),
     pin-round(y: -9.7, d: SE),
-    station([刘村], []),
+    station([刘村], [], logo-anchor: SE),
     station([凤集大道], []),
     station([凤汇大道], []),
     pin-round(x: -13.5, d: SW),
     station([板桥中心], []),
     pin-round(y: -12.5, d: S),
     station([板桥], []),
-    station([莲花湖公园], []),
+    station([莲花湖公园], [], logo-anchor: NW),
     pin(x: -10.0, d: E),
   ),
   line(
@@ -460,10 +458,10 @@
     optional: true,
 
     pin(x: -18.5, y: 0., cfg: "L10-3"),
-    station([科工园], [KEGONGYUAN]),
+    station([科工园], [KEGONGYUAN], logo-anchor: SE),
     station([新胜河], [XINSHENGHE]),
     pin(x: -16.5, y: 2.),
-    station([雨山路], [YUSHANLU], r: 0.0, cfg: none),
+    station([雨山路], [YUSHANLU], r: 0.0, cfg: none, logo-anchor: SE),
     station([文德路], [WENDELU]),
     station([龙华路], [LONGHUALU]),
     pin-round(x: -13.5, y: 5., d: NE),
@@ -481,7 +479,7 @@
     station([小行], [XIAOHANG]),
     pin-round(x: -4., d: SE),
     pin-round(x: -3. + 0.14, d: E),
-    station([安德门], [ANDEMEN], r: 1.0),
+    station([安德门], [ANDEMEN], r: 1.0, logo-anchor: SE),
     pin(y: -5.25, d: NE, cfg: "L10-2"),
     pin-round(y: -5., d: NE),
     station([共青团路], [GONGQINGTUANLU]),
@@ -497,7 +495,7 @@
     pin-round(x: 6., d: NE),
     station([杨庄], [YANGZHUANG], x: 7.5),
     station([石杨路], [SHIYANGLU]),
-    station([东麒路], [DONGQILU]),
+    station([东麒路], [DONGQILU], logo-anchor: W),
     pin(x: 9.5, d: E),
   ),
   line(
@@ -506,11 +504,11 @@
     optional: true,
 
     pin(x: -5., y: 12.5),
-    station([浦洲路], [PUZHOULU]),
+    station([浦洲路], [PUZHOULU], logo-anchor: S),
     station([柳洲东路], [LIUZHOUDONGLU]),
     pin-round(y: 11., d: S),
     station([明滨路], [MINGBINLU], x: -5.25),
-    station([长江大桥北], [CHANGJIANGDAQIAOBEI]),
+    station([长江大桥北], [CHANGJIANGDAQIAOBEI], anchor: W),
     station([柳洲南路], [LIUZHOUNANLU]),
     station([浦东路], [PUDONGLU]),
     station([新马路], [XINMALU]),
@@ -526,7 +524,7 @@
     station([行知路], [XINGZHILU]),
     station([绿水湾路], [LÜSHUIWANLU]),
     station([西江口], [XIJIANGKOU], y: -2),
-    station([马骡圩], [MALUOWEI]),
+    station([马骡圩], [MALUOWEI], logo-anchor: SE),
     pin(y: -4., d: SW),
   ),
   line(
@@ -535,7 +533,7 @@
     optional: true,
 
     pin(x: 11.0 + 0.1, y: 3.0),
-    station([金马路], []),
+    station([金马路], [], logo-anchor: W),
     pin-round(y: 1.5, d: S),
     pin-round(x: 12.0, d: E),
     station([百水桥], []),
@@ -568,7 +566,7 @@
     pin-round(y: -14.0, d: S),
     station([河海大学·佛城西路], []),
     station([康厚街], []),
-    station([牛首山], []),
+    station([牛首山], [], logo-anchor: E),
     pin(x: -3.0, d: W),
   ),
   line(
@@ -577,7 +575,7 @@
     optional: true,
 
     pin(x: -11.5, y: 6.),
-    station([国际健康社区], []),
+    station([国际健康社区], [], logo-anchor: N),
     pin-round(dx: 1.0 - 0.14, d: E),
     station([江北商务区], []),
     station([江北市民中心], []),
@@ -603,7 +601,7 @@
     pin-round(x: 6.5, d: E),
     station([胜利村], []),
     pin-round(y: -3.5 + 0.14, d: S),
-    station([高桥门], []),
+    station([高桥门], [], logo-anchor: SE),
     pin(dx: -0.8, d: SW),
   ),
   line(
@@ -612,7 +610,7 @@
     optional: true,
 
     pin(x: 3.5, y: -6.0 + 0.1),
-    station([机场跑道旧址], []),
+    station([机场跑道旧址], [], logo-anchor: NW),
     pin-round(x: 2.5, d: W),
     station([大明路], []),
     station([玉兰路], [], x: 1.5, anchor: SE),
@@ -634,7 +632,7 @@
     station([板桥东], []),
     pin-round(x: -11.0, d: SW),
     station([绿洲], [], x: -11.5),
-    station([板桥南], []),
+    station([板桥南], [], logo-anchor: NW),
     pin(x: -12.5, d: W),
   ),
   line(
@@ -643,7 +641,7 @@
     optional: true,
 
     pin(x: -12 - 0.1, y: 12),
-    station([南京北站], []),
+    station([南京北站], [], logo-anchor: E),
 
     pin-round(y: 11.0 - 0.3, d: S, corner-radius: 0.25),
     pin-round(x: -10.75, d: SE),
@@ -676,7 +674,7 @@
     pin-round(x: -1.0, d: W),
     pin-round(y: -20.0 - 0.1, d: S),
     station([禄口机场西], []),
-    station([禄口机场], []),
+    station([禄口机场], [], logo-anchor: N),
     pin(x: 1.0, d: E),
   ),
   line(
@@ -696,7 +694,7 @@
     station([翔宇路南], [XIANGYULUNAN]),
     pin-round(y: -20., d: S),
     station([禄口机场], [LUKOU INTERNATIONAL AIRPORT]),
-    station([空港新城江宁], [KONGGANGXINCHENGJIANGNING]),
+    station([空港新城江宁], [KONGGANGXINCHENGJIANGNING], logo-anchor: N),
     pin(dx: 3., d: E),
   ),
   line(
@@ -730,7 +728,7 @@
     station([九华路], []),
     station([采石河], []),
     station([当涂东], []),
-    station([当涂南], []),
+    station([当涂南], [], logo-anchor: N),
     pin(dy: -6., d: S),
   ),
   line(
@@ -761,7 +759,7 @@
     station([石碛河], []),
     station([桥林新城], []),
     station([林山], []),
-    station([高家冲], []),
+    station([高家冲], [], logo-anchor: SE),
     pin(dx: -3.25, d: SW),
   ),
   line(
@@ -807,7 +805,6 @@
     color: rgb("#ff661f"),
     optional: true,
 
-
     pin(x: -12. + 0.1, y: 12.),
     station([南京北站], []),
     pin-round(dy: 1.5, d: N),
@@ -834,7 +831,7 @@
     station([花博园], [], dy: -0.5),
     station([腰铺], [], dy: -1.5),
     pin-round(dy: -2., d: S),
-    station([滁州高铁站], []),
+    station([滁州高铁站], [], logo-anchor: N),
     pin(dy: -0.5, d: SE),
   ),
   line(
@@ -843,7 +840,7 @@
     optional: true,
 
     pin(x: 16.0 + 0.1, y: 3.0, cfg: "L5-S"),
-    station([东流], []),
+    station([东流], [], logo-anchor: NE),
     pin-round(dy: 1.0, d: N),
     pin-round(dy: 1., d: NE),
     station([骆家边], [], x: 17.5),
@@ -870,7 +867,7 @@
     pin-round(dx: 4.5, d: E),
     station([扬州汊河], []),
     station([站南路], []),
-    station([扬州西站], []),
+    station([扬州西站], [], logo-anchor: S),
     pin(dy: 3., d: N),
   ),
   line(
@@ -879,7 +876,7 @@
     optional: true,
 
     pin(x: 6.0, y: -1.0 + 0.1, cfg: "S6-W"),
-    station([南京农业大学], []),
+    station([南京农业大学], [], logo-anchor: N),
     pin-round(x: 6.5 + 0.1, d: E, corner-radius: 0.3),
     pin-round(y: -1.5, d: S),
     station([南京理工大学], [], x: 7.5),
@@ -889,7 +886,7 @@
     station([五棵松], []),
     pin-round(y: 1.0, d: NE),
     pin(x: 10.0, y: 1., cfg: none),
-    station([马群], [], r: 0),
+    station([马群], [], r: 0, logo-anchor: N),
     station([百水桥], [], x: 12.0),
     station([麒麟门], [], x: 13.0),
     station([东郊小镇], [], x: 15.0),
@@ -911,7 +908,7 @@
     pin-round(dx: 2., d: E),
     station([华阳], []),
     station([崇明], []),
-    station([句容], []),
+    station([句容], [], logo-anchor: N),
     pin(dy: -6., d: S),
   ),
   line(
@@ -930,7 +927,7 @@
     station([溧水], []),
     station([中山湖], []),
     station([幸庄], []),
-    station([无想山], []),
+    station([无想山], [], logo-anchor: N),
     pin(dy: -2.5, d: S),
   ),
   line(
@@ -939,10 +936,10 @@
     optional: true,
 
     pin(x: -6., y: 10., cfg: "S8-N"),
-    station([长江大桥北], []),
+    station([长江大桥北], [], logo-anchor: NW),
     station([毛纺厂路], []),
     pin(dy: 1.25, d: NW, cfg: none),
-    station([泰山新村], [], r: 0.),
+    station([泰山新村], [], r: 0., logo-anchor: NW),
     pin-round(dy: 0.25, d: NW),
     station([泰冯路], []),
     station([高新开发区], []),
@@ -960,7 +957,7 @@
     station([方州广场], []),
     station([沈桥], []),
     station([八百桥], []),
-    station([金牛湖], []),
+    station([金牛湖], [], logo-anchor: S),
     pin(dx: 6., d: NE),
   ),
   line(
@@ -969,7 +966,7 @@
     optional: true,
 
     pin(x: -0.5, y: -19.),
-    station([翔宇路南], []),
+    station([翔宇路南], [], logo-anchor: SE),
     pin-round(dx: -0.1, d: SW),
     pin-round(y: -20.75, d: S),
     station([铜山], []),
@@ -977,7 +974,7 @@
     station([石湫], [], y: -21.),
     station([明觉], [], y: -22.),
     station([团结圩], [], y: -24.),
-    station([高淳], []),
+    station([高淳], [], logo-anchor: E),
     pin(y: -25., d: S),
   ),
   line(
@@ -985,7 +982,7 @@
     color: rgb("#ffc65f"),
     optional: true,
     pin(x: -4.5 - 0.1, y: -2),
-    station([集庆门大街], []),
+    station([集庆门大街], [], logo-anchor: SE),
     pin-round(y: -1 - 0.1, d: N),
     station([清江南路], []),
     pin(x: -5.5, d: W),
@@ -1017,7 +1014,7 @@
     "progress": ("L:6", "L:9", "L:11"),
     "futures": (),
   ),
-  default-features: ("phase-1", "phase-2"),
+  default-features: ("phase-1" /* "phase-2" */,),
 )
 #let nj-radish = radish(
   nj-metro,
@@ -1025,4 +1022,35 @@
   // features: ("phase-1", "built", "L2-EE", "no-jqmdj", "L5-S", "L5-N", "L7-N", "L7-S"),
   enable-all: true,
 )
-#radishom(nj-radish, backend: "std", unit-length: 2.0cm)
+
+
+#let line-logo(num, color, text-color: white) = {
+  set text(size: if "-" in num { 2.5em } else { 3em })
+  show: box.with(inset: 0.3em)
+  show: box.with(width: 0.5em * num.len(), height: 1.0em, fill: color)
+  set align(center + horizon)
+  show: box.with(width: 1em * num.len())
+  show: scale.with(x: 80%, y: 100%)
+  set text(font: "Swis721 BT", fill: text-color)
+  show "S": box(scale(x: 90%, y: 95%, reflow: true, [S]))
+  num
+}
+
+#let draw-line-logo(line, station) = {
+  let metadata = station.metadata.named()
+  if "terminal" in station and "logo-anchor" in metadata and metadata.logo-anchor != none {
+    let payload = (
+      body: line-logo(line.number, line.color),
+      pos: station.pos,
+      anchor: metadata.logo-anchor,
+    )
+    payload
+  }
+}
+
+#radishom(
+  nj-radish,
+  backend: "std",
+  unit-length: 2.0cm,
+  station-plugins: (draw-line-logo,),
+)

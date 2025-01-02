@@ -98,6 +98,15 @@
     _draw(block(width: 0pt, height: 0pt, align(center + horizon, marker.body)), marker.pos, unit-length)
   }
 
+  for fg in task.foreground {
+    let body = if "anchor" in fg {
+      _anchored(fg.body, fg.anchor)
+    } else {
+      fg.body
+    }
+    _draw(body, fg.pos, unit-length)
+  }
+
   for label in task.labels {
     let content = _anchored(label.body, label.anchor)
     if label.hidden {

@@ -17,6 +17,7 @@
   pin: none,
   cfg: none,
   cfg-not: none,
+  ..metadata,
 ) = {
   if id == auto {
     id = if type(name) == str { name } else { name.text }
@@ -33,5 +34,6 @@
     pin: pin,
     cfg: cfg,
     cfg-not: cfg-not,
+    metadata: metadata,
   )
 }

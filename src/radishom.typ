@@ -17,9 +17,9 @@
   set align(if "west" in station.anchor { left } else if "east" in station.anchor { right } else { center })
 
   [
-    #station.name
+    #text(font: "Microsoft YaHei", station.name)
 
-    #text(0.5em, station.subname)
+    #text(size: 0.45em, font: "Source Han Sans SC", station.subname)
     // #text(0.5em)[(#calc.round(station.pos.at(0), digits: 1), #calc.round(station.pos.at(1), digits: 1))]
   ]
 }
@@ -32,6 +32,8 @@
   line-stroker: auto,
   marker-renderer: auto,
   label-renderer: auto,
+  line-plugins: (),
+  station-plugins: (),
 ) = {
   let backend = if backend == "cetz" {
     import "backends/cetz.typ" as cetz-be
@@ -47,7 +49,7 @@
   if label-renderer == auto { label-renderer = default-label-renderer }
 
   // render task
-  let task = (lines: (), markers: (), labels: ())
+  let task = (lines: (), markers: (), labels: (), foreground: ())
 
   let (min-x, min-y, max-x, max-y) = (0, 0, 0, 0)
 
@@ -94,6 +96,20 @@
 
       let label = label-renderer(sta)
       task.labels.push((pos: pos, body: label, anchor: sta.anchor, hidden: hidden))
+
+      for plugin in station-plugins {
+        let fg = plugin(line, sta)
+        if fg != none {
+          task.foreground.push(fg)
+        }
+      }
+    }
+
+    for plugin in line-plugins {
+      let fg = plugin(line)
+      if fg != none {
+        task.foreground.push(fg)
+      }
     }
   }
 
