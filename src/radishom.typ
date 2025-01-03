@@ -20,7 +20,7 @@
     #text(font: "Microsoft YaHei", station.name)
 
     #text(size: 0.45em, font: "Source Han Sans SC", station.subname)
-    // #text(0.5em)[(#calc.round(station.pos.at(0), digits: 1), #calc.round(station.pos.at(1), digits: 1))]
+    // #text[(#calc.round(station.pos.at(0), digits: 1), #calc.round(station.pos.at(1), digits: 1))]
   ]
 }
 
@@ -29,6 +29,9 @@
   backend: "cetz",
   unit-length: 1cm,
   grid: auto,
+  foreground: (),
+  background: (),
+  background-color: white,
   line-stroker: auto,
   marker-renderer: auto,
   label-renderer: auto,
@@ -49,7 +52,14 @@
   if label-renderer == auto { label-renderer = default-label-renderer }
 
   // render task
-  let task = (lines: (), markers: (), labels: (), foreground: ())
+  let task = (
+    lines: (),
+    markers: (),
+    labels: (),
+    background-color: background-color,
+    foreground: foreground,
+    background: background,
+  )
 
   let (min-x, min-y, max-x, max-y) = (0, 0, 0, 0)
 
@@ -84,18 +94,18 @@
       max-x = calc.max(max-x, pos.at(0))
       max-y = calc.max(max-y, pos.at(1))
 
+      let marker-pos = if has-transfer {
+        get-transfer-marker-pos(metro, sta.id)
+      } else {
+        pos
+      }
       if not hidden {
-        let marker-pos = if has-transfer {
-          get-transfer-marker-pos(metro, sta.id)
-        } else {
-          pos
-        }
         let marker = marker-renderer(line, sta, has-transfer: has-transfer)
         task.markers.push((pos: marker-pos, body: marker))
       }
 
       let label = label-renderer(sta)
-      task.labels.push((pos: pos, body: label, anchor: sta.anchor, hidden: hidden))
+      task.labels.push((pos: marker-pos, body: label, anchor: sta.anchor, hidden: hidden))
 
       for plugin in station-plugins {
         let fg = plugin(line, sta)
@@ -117,7 +127,11 @@
   if grid == auto or grid == none {
     grid = ((calc.floor(min-x - 0.5), calc.floor(min-y - 0.5)), (calc.ceil(max-x + 0.5), calc.ceil(max-y + 0.5)))
   }
-  task.grid = (coords: grid, stroke: gray.transparentize(50%))
+  task.grid = (
+    coords: grid,
+    stroke: gray.transparentize(50%),
+    heavy-stroke: gray.transparentize(40%) + 2pt,
+  )
 
   backend.render(task, unit-length)
 }

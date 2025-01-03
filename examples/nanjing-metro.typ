@@ -197,7 +197,7 @@
     station([蒋王庙], [JIANGWANGMIAO], x: 4.5),
     station([王家湾], [WANGJIAWAN], x: 5.25),
     pin-round(x: 5.5, d: NE),
-    station([聚宝山], [JUBAOSHAN], x: 7.5),
+    station([聚宝山], [JUBAOSHAN], x: 8.0),
     pin-round(x: 9.5, d: E),
     station([徐庄], [XUZHUANG], x: 10.),
     pin-round(x: 11. + 0.2, d: SE),
@@ -214,8 +214,18 @@
     station([西岗桦墅], [XIGANGHUASHU], dy: 0.75),
     pin-round(y: 7.0, d: N),
     pin-round(dx: -0.4, d: NW),
-    station([仙林湖], [XIANLINHU], logo-anchor: W),
-    pin(y: 8., d: N),
+    station([仙林湖], [XIANLINHU], r: 1.0, logo-anchor: W),
+    pin(y: 8., d: N, cfg: "L4-4"),
+    pin-round(y: 8.5, d: N),
+    pin-round(x: 18.25, d: NW),
+    station([白象], [BAIXIANG], y: 9.5, anchor: E),
+    pin-round(y: 10.0, d: N),
+    pin-round(x: 18.5, d: NE),
+    station([官窑山路], [GUANYAOSHANLU], anchor: E),
+    pin-round(y: 11.0, d: N),
+    station([华侨城], [HUAQIAOCHENG], x: 19.0),
+    station([欢乐谷], [HUANLEGU], logo-anchor: N),
+    pin(x: 20.0, d: E),
   ),
   line(
     number: "5",
@@ -298,11 +308,15 @@
     station([兴学路], [XINGXUELU], x: 6.),
     station([兴智街], [XINGZHIJIE]),
     station([十月广场], [SHIYUEGUANGCHANG], x: 9.5),
-    pin-round(x: 10.5, d: E),
+    pin-round(x: 11.0, d: E),
     pin-round(dy: 0.5, d: N),
-    station([金陵石化], [JINLINGSHIHUA], x: 11.5),
-    station([栖霞山], [QIXIASHAN], logo-anchor: NW),
-    pin(x: 13.5, d: E),
+    station([金陵石化], [JINLINGSHIHUA], x: 12.5),
+    station([栖霞山], [QIXIASHAN], r: 1.0, logo-anchor: NW),
+    pin(x: 15., d: E, cfg: "L6-E"),
+    pin-round(x: 18.0, d: E),
+    pin-round(y: 10.0 + 0.1, d: S),
+    station([摄山], [], r: 1.0, anchor: N, logo-anchor: S),
+    pin(x: 19.0, d: E),
   ),
   line(
     number: "7",
@@ -467,7 +481,7 @@
     pin-round(x: -13.5, y: 5., d: NE),
     station([南京工业大学], [NANJING TECH]),
     station([浦口万汇城], [PUKOUWANHUICHENG], anchor: W),
-    station([临江·青奥体育公园], [LINJIANG/YOGSP], x: -11.),
+    station([临江·青奥体育公园], [LINJIANG/YOGSP], x: -11.5),
     station([江心洲], [JIANGXINZHOU], x: -8.),
     station([绿博园], [LÜBOYUAN]),
     pin-round(x: -5.5, y: -3, d: SE),
@@ -794,7 +808,7 @@
     pin-round(y: 5.0, d: N),
     pin-round(y: 5.5, d: NW),
     station([南大仙林校区], []),
-    station([江苏广电], []),
+    station([江苏广电], [], y: 9.0),
     pin-round(y: 9.5, d: N),
     pin-round(x: 12.0 - 0.14, d: W),
     station([仙林站], []),
@@ -1023,6 +1037,174 @@
   enable-all: true,
 )
 
+#let land-fill = rgb("#f6f6f6")
+#let water-fill = rgb("#c3ddf4")
+#let water-stroke = stroke(paint: rgb("#c5d6ea"), thickness: 2pt, cap: "round", join: "round")
+#let mountain-fill = rgb("#bfe0d7")
+
+#let bg-label(name, name-en, text-size: 1em) = {
+  show: place.with(center + horizon)
+  set par(spacing: 0.25em)
+  set align(center)
+  set text(font: "Microsoft YaHei", fill: white, size: text-size)
+
+  text(0.8em, name)
+  parbreak()
+  text(0.3em, name-en)
+}
+
+#let polygon = polygon.with(corner-radius: 0.25)
+
+#let changjiang = polygon(
+  fill: water-fill,
+  stroke: water-stroke,
+  label: bg-label([长江], [CHANGJIANG], text-size: 1.2em),
+  label-pos: (9.0, 12.0),
+  (-17, -26), // bottom-right
+  (-17, -11),
+  (-13, -7),
+  (-10.5, -7),
+  (-8, -4.5),
+  (-8, -2),
+  (-6., 0),
+  (-6., 6),
+  (-3, 9),
+  (-1.5, 9),
+  (1., 11.5),
+  (19, 11.5),
+  (20.0, 12.5),
+  (30, 12.5),
+  (30, 13),
+  (19.5, 13),
+  (19, 12.5),
+  (8, 12.5),
+  (8, 17),
+  (-2, 17),
+  (-2, 11.5),
+  (-10, 3.5),
+  (-10, 2),
+  (-13, -1),
+  (-13, -4),
+  (-20, -11),
+  (-20, -26), // bottom-left
+)
+
+#let baguazhou = polygon(
+  fill: land-fill,
+  stroke: water-stroke,
+  (7., 12.5), // bottom-right
+  (7., 16.),
+  (-1., 16.),
+  (-1., 11.75),
+  (-2.25, 10.5),
+  (-1.5, 10.5),
+  (0.5, 12.5), // bottom-left
+)
+#let jiangxinzhou = polygon(
+  fill: land-fill,
+  stroke: water-stroke,
+  (-6.5, 3.5), // top-right
+  (-6.5, 0.25),
+  (-8.5, -1.75),
+  (-8.5, -4.25),
+  (-10.75, -6.5),
+  (-13, -6.5),
+  (-11, -4.5),
+  (-11, -1.5),
+  (-7.5, 2),
+  (-7.5, 2.5),
+)
+#let qianzhou = polygon(
+  fill: land-fill,
+  stroke: water-stroke,
+  (-6.5, 4.5), // bottom-right
+  (-6.5, 5.5),
+  (-8, 4),
+  (-8, 3),
+)
+#let xuanwuhu = polygon(
+  fill: water-fill,
+  stroke: water-stroke,
+  label: bg-label([玄武湖], [XUANWU LAKE]),
+  label-pos: (1.25, 3.5),
+  (0.75, 2.5), // bottom-left
+  (2.5, 2.5),
+  (2.5, 3.25),
+  (1.75, 4.0),
+  (1.75, 4.25),
+  (0.75, 5.25),
+  (0.25, 4.75),
+  (0.25, 3.0),
+)
+#let shijiuhu = polygon(
+  fill: water-fill,
+  stroke: water-stroke,
+  (2.0, -22.25), // top-right
+  (-1.5, -22.25),
+  (-1.5, -23.75),
+  (2.0, -23.75), // bottom-right
+)
+#let rw = 1 / 16
+#let rw2 = rw / 2
+#let qinhuaihe = polygon(
+  fill: water-fill,
+  stroke: water-stroke,
+  corner-radius: 1 / 8,
+  // start from sanchahe
+  (-6.0, 3.5 - rw),
+  (-4.0 - rw, 3.5 - rw),
+  (-4.0 - rw, 1.5 - rw2),
+  (-1.5 - rw, -1.0 - rw2),
+  (-1.5 - rw, -3.5 - rw),
+  (1.75 + rw, -3.5 - rw),
+  (1.75 + rw, -3.25 - rw),
+  (5.5 - rw, -3.25 - rw),
+  (5.5 - rw, -7.75 + rw2),
+  (3.75 - rw, -9.25 + rw2),
+  (3.75 - rw, -9.75 + rw), // turn near hedingqiao
+  (0.75 + rw2, -9.75 + rw),
+  (0.0 + rw2, -9.0 + rw),
+  (-13.0 + rw, -9.0 + rw),
+  (-14.0 + rw, -8.0 + rw),
+  // at yuzui
+  (-14.0 - rw, -8.0 - rw),
+  (-13.0 - rw, -9.0 - rw),
+  (0.0 - rw2, -9.0 - rw),
+  (0.75 - rw2, -9.75 - rw),
+  (3.75 - rw, -9.75 - rw),
+  (3.75 - rw, -14.0 - rw2),
+  (4.25 - rw, -14.5 - rw2),
+  (4.25 - rw, -18.0),
+  // back from shangqinhuai
+  (4.25 + rw, -18.0),
+  (4.25 + rw, -14.5 + rw2),
+  (3.75 + rw, -14.0 + rw2),
+  (3.75 + rw, -9.25 - rw2),
+  (5.5 + rw, -7.75 - rw2),
+  (5.5 + rw, -3.25 + rw),
+  (1.75 - rw, -3.25 + rw), // turn near wudingmen
+  (1.75 - rw, -3.5 + rw),
+  (-1.5 + rw, -3.5 + rw),
+  (-1.5 + rw, -1.0 + rw2),
+  (-4.0 + rw, 1.5 + rw2),
+  (-4.0 + rw, 3.5 + rw),
+  (-6.0, 3.5 + rw),
+  // back to sanchahe
+)
+
+#let zijinshan = polygon(
+  fill: mountain-fill,
+  label: bg-label([紫金山], [ZIJIN MOUNTAIN]),
+  label-pos: (6.75, 2.5),
+  (3.75, 3.0), // top-left
+  (5.5, 4.75),
+  (8.0, 4.75),
+  (9.75, 3.0),
+  (9.75, 1.5),
+  (8.5, 0.25),
+  (5.0, 0.25),
+  (3.75, 1.5), // bottom-left
+)
 
 #let line-logo(num, color, text-color: white) = {
   set text(size: if "-" in num { 2.5em } else { 3em })
@@ -1052,5 +1234,8 @@
   nj-radish,
   backend: "std",
   unit-length: 2.0cm,
+  // grid: none,
+  background-color: land-fill,
+  background: (changjiang, baguazhou, jiangxinzhou, qianzhou, xuanwuhu, shijiuhu, qinhuaihe, zijinshan),
   station-plugins: (draw-line-logo,),
 )
