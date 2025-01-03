@@ -110,17 +110,18 @@
 
     let end-pos = resolve-moved(cur-point, last-pin, cur-point.d)
 
+    let (sx, sy) = (last-pin.x, last-pin.y)
+    let (tx, ty) = (end-pos.x, end-pos.y)
+    let angle = calc.atan2(tx - sx, ty - sy)
+
     let seg = (
-      start: (last-pin.x, last-pin.y),
-      end: (end-pos.x, end-pos.y),
+      start: (sx, sy),
+      end: (tx, ty),
+      angle: angle,
       range: (start: stations.len(), end: stations.len() + j - i),
       cfg: cur-cfg,
       cfg-not: cur-cfg-not,
     )
-
-    let (sx, sy) = seg.start
-    let (tx, ty) = seg.end
-    let angle = calc.atan2(tx - sx, ty - sy)
     let q = calc.rem(int((angle + 22.5deg + 180deg) / 45.0deg), 4)
 
     // process stations on this segment

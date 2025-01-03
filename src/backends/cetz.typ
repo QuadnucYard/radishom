@@ -1,16 +1,6 @@
 #import "../deps.typ": cetz
 
 
-#let default-marker-renderer(line, station, has-transfer: false) = {
-  if has-transfer {
-    cetz.draw.circle((), fill: white, stroke: black + 1pt, radius: 6pt)
-  } else if "terminal" in station {
-    cetz.draw.circle((), fill: white, stroke: line.color + 1.0pt, radius: 4pt)
-  } else {
-    cetz.draw.circle((), fill: white, stroke: none, radius: 2.0pt)
-  }
-}
-
 #let render(task, unit-length) = {
   import cetz.draw
   cetz.canvas(

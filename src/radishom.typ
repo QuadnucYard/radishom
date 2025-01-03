@@ -3,30 +3,9 @@
 #import "metro.typ": get-line-by-id, get-transfer-marker-pos
 
 
-#let default-line-stroke(line, thickness: 6pt) = stroke(
-  paint: line.color,
-  thickness: thickness,
-  cap: "round",
-  join: "round",
-)
-
-#let default-label-renderer(station) = {
-  show: block.with(inset: (x: 0.6em, y: 0.4em))
-  set par(spacing: 0.2em)
-  set smartquote(enabled: false)
-  set align(if "west" in station.anchor { left } else if "east" in station.anchor { right } else { center })
-
-  [
-    #text(font: "Microsoft YaHei", station.name)
-
-    #text(size: 0.45em, font: "Source Han Sans SC", station.subname)
-    // #text[(#calc.round(station.pos.at(0), digits: 1), #calc.round(station.pos.at(1), digits: 1))]
-  ]
-}
-
 #let radishom(
   metro,
-  backend: "cetz",
+  backend: "std",
   unit-length: 1cm,
   grid: auto,
   foreground: (),
@@ -38,18 +17,26 @@
   line-plugins: (),
   station-plugins: (),
 ) = {
-  let backend = if backend == "cetz" {
+  let (backend, components) = if backend == "cetz" {
     import "backends/cetz.typ" as cetz-be
-    cetz-be
+    import "components/cetz.typ" as cetz-comp
+    (cetz-be, dictionary(cetz-comp))
   } else if backend == "std" {
     import "backends/std.typ" as std-be
-    std-be
+    import "components/std.typ" as std-comp
+    (std-be, dictionary(std-comp))
   } else {
     panic("unknown backend: " + backend)
   }
-  if line-stroker == auto { line-stroker = default-line-stroke }
-  if marker-renderer == auto { marker-renderer = backend.default-marker-renderer }
-  if label-renderer == auto { label-renderer = default-label-renderer }
+  if line-stroker == auto {
+    line-stroker = components.line-stroke
+  }
+  if marker-renderer == auto {
+    marker-renderer = components.marker-renderer
+  }
+  if label-renderer == auto {
+    label-renderer = components.label-renderer
+  }
 
   // render task
   let task = (
@@ -81,8 +68,9 @@
         continue
       }
 
-      let has-transfer = sta.id in metro.enabled-transfers
-      let is-not-first-transfer = has-transfer and line.number != metro.enabled-transfers.at(sta.id).at(0)
+      let transfers = metro.enabled-transfers.at(sta.id, default: none)
+      let has-transfer = transfers != none
+      let is-not-first-transfer = has-transfer and line.number != transfers.at(0)
 
       //check marker
       let hidden = sta.hidden or is-not-first-transfer
@@ -100,7 +88,7 @@
         pos
       }
       if not hidden {
-        let marker = marker-renderer(line, sta, has-transfer: has-transfer)
+        let marker = marker-renderer(line, sta, transfers)
         task.markers.push((pos: marker-pos, body: marker))
       }
 

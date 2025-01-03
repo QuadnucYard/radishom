@@ -99,16 +99,6 @@
   place(shape)
 }
 
-#let default-marker-renderer(line, station, has-transfer: false) = {
-  if has-transfer {
-    circle(fill: white, stroke: black + 1pt, radius: 6pt)
-  } else if "terminal" in station {
-    circle(fill: white, stroke: line.color + 1.0pt, radius: 4pt)
-  } else {
-    circle(fill: white, stroke: none, radius: 2.0pt)
-  }
-}
-
 #let render(task, unit-length) = {
   show: _get-canvas(task.grid.coords, unit-length, fill: task.background-color)
 
