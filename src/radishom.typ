@@ -88,7 +88,7 @@
         pos
       }
       if not hidden {
-        let marker = marker-renderer(line, sta, transfers)
+        let marker = marker-renderer(metro, line, sta, transfers)
         task.markers.push((pos: marker-pos, body: marker))
       }
 

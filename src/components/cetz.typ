@@ -2,7 +2,7 @@
 #import "common.typ": *
 
 
-#let marker-renderer(line, station, transfers) = {
+#let marker-renderer(metro, line, station, transfers) = {
   if transfers != none {
     cetz.draw.circle((), fill: white, stroke: black + 1pt, radius: 6pt)
   } else if "terminal" in station {

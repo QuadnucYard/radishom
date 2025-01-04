@@ -39,8 +39,10 @@
   let pos = (0, 0)
   let cnt = 0
   for line-num in metro.transfers.at(station-id) {
-    let sta = get-line-station-by-id(metro, line-num, station-id)
-    if sta != none {
+    let line = get-line-by-id(metro, line-num)
+    if line.disabled { continue }
+    let sta = get-station-by-id(line, station-id)
+    if sta != none and not sta.disabled {
       pos = cetz.vector.add(pos, sta.pos)
       cnt += 1
     }
@@ -49,6 +51,29 @@
     pos = cetz.vector.div(pos, cnt)
   }
   return pos
+}
+
+#let get-transfer-marker-rot(metro, station-id, transfers) = {
+  let angles = for line-id in transfers {
+    let line = get-line-by-id(metro, line-id)
+    let sta = get-station-by-id(line, station-id)
+    let angle = line.segments.at(sta.segment).angle
+    if angle <= -90deg { angle += 180deg }
+    if angle > 90deg { angle -= 180deg }
+    (angle,)
+  }
+  return if angles.dedup().len() == 1 {
+    // parallel case
+    angles.at(0) + 90deg
+  } else if angles.contains(0deg) {
+    // prefer horizontal
+    0deg
+  } else if angles.contains(90deg) {
+    90deg
+  } else {
+    // along the direction of the first line
+    angles.at(0)
+  }
 }
 
 #let _resolve-transfers(lines) = {

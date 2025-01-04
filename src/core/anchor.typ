@@ -59,7 +59,7 @@
   return _anchors.at(min-index(punishment))
 }
 
-#let _get-best-anchor(metro, line, sta) = {
+#let get-best-anchor(metro, line, sta) = {
   if sta.transfer == none or sta.id not in metro.transfers {
     let angle = line.segments.at(sta.segment).angle + 90deg
     if angle <= -22.5deg { angle += 180deg }
@@ -67,17 +67,4 @@
     return _anchors.at(q)
   }
   return _get-best-anchor-tr(metro, sta.id)
-}
-
-#let resolve-pending-anchors(metro) = {
-  (metro.lines.enumerate()).map(((i, line)) => {
-    for (k, sta) in line.stations.enumerate() {
-      // set station anchor
-      if sta.anchor == auto {
-        line.stations.at(k).anchor = _get-best-anchor(metro, line, sta)
-      }
-    }
-
-    return line
-  })
 }

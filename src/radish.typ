@@ -1,6 +1,6 @@
 /// Featuee-based metro instantiation.
 
-#import "core/anchor.typ": resolve-pending-anchors
+#import "core/anchor.typ": get-best-anchor
 #import "feature.typ": resolve-enabled-features
 #import "line.typ": get-segment-of-station
 
@@ -20,6 +20,19 @@
   }
   station-collection = station-collection.pairs().filter(((k, v)) => v.len() > 1).to-dict()
   return station-collection
+}
+
+#let _resolve-pending-station-attrs(metro) = {
+  (metro.lines.enumerate()).map(((i, line)) => {
+    for (k, sta) in line.stations.enumerate() {
+      // set station anchor
+      if sta.anchor == auto {
+        line.stations.at(k).anchor = get-best-anchor(metro, line, sta)
+      }
+    }
+
+    return line
+  })
 }
 
 /// Instantiate a metro system with given features.
@@ -108,8 +121,8 @@
 
     metro.lines.at(i) = line
   }
-  metro.lines = resolve-pending-anchors(metro)
   metro.enabled-transfers = _resolve-enabled-transfers(metro.lines)
+  metro.lines = _resolve-pending-station-attrs(metro)
 
   metro
 }
