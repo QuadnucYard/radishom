@@ -1,6 +1,6 @@
 #import "deps.typ": cetz
 #import "line.typ": get-station-by-id
-#import "metro.typ": get-line-by-id, get-transfer-marker-pos
+#import "metro.typ": get-line-by-id, get-transfer-label-pos, get-transfer-marker-pos
 
 
 #let radishom(
@@ -93,7 +93,12 @@
       }
 
       let label = label-renderer(sta)
-      task.labels.push((pos: marker-pos, body: label, anchor: sta.anchor, hidden: hidden))
+      let label-pos = if has-transfer {
+        get-transfer-label-pos(metro, sta, marker-pos)
+      } else {
+        pos
+      }
+      task.labels.push((pos: label-pos, body: label, anchor: sta.anchor, hidden: hidden))
 
       for plugin in station-plugins {
         let fg = plugin(line, sta)

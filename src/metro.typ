@@ -35,10 +35,11 @@
   return none
 }
 
+/// Get a suitable position of the transfer marker for the given station.
 #let get-transfer-marker-pos(metro, station-id) = {
   let pos = (0, 0)
   let cnt = 0
-  for line-num in metro.transfers.at(station-id) {
+  for line-num in metro.enabled-transfers.at(station-id) {
     let line = get-line-by-id(metro, line-num)
     if line.disabled { continue }
     let sta = get-station-by-id(line, station-id)
@@ -53,6 +54,7 @@
   return pos
 }
 
+/// Get a suitable rotation of the transfer marker for the given station.
 #let get-transfer-marker-rot(metro, station-id, transfers) = {
   let angles = for line-id in transfers {
     let line = get-line-by-id(metro, line-id)
@@ -74,6 +76,28 @@
     // along the direction of the first line
     angles.at(0)
   }
+}
+
+/// Get a suitable position of the label for the given station based on anchor.
+#let get-transfer-label-pos(metro, station, hint) = {
+  let (x, y) = hint
+  let anchor = station.anchor
+  for line-num in metro.enabled-transfers.at(station.id) {
+    let line = get-line-by-id(metro, line-num)
+    let sta = get-station-by-id(line, station.id)
+    let (x1, y1) = sta.pos
+    if "west" in anchor {
+      x = calc.max(x, x1)
+    } else if "east" in anchor {
+      x = calc.min(x, x1)
+    }
+    if "south" in anchor {
+      y = calc.max(y, y1)
+    } else if "south" in anchor {
+      y = calc.min(y, y1)
+    }
+  }
+  return (x, y)
 }
 
 #let _resolve-transfers(lines) = {
