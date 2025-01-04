@@ -2,9 +2,6 @@
 #import "utils.typ": lerp
 
 
-#let anchors = ("south", "north-west", "west", "south-west")
-
-
 #let pin(
   x: auto,
   y: auto,
@@ -30,7 +27,7 @@
   )
 }
 
-#let resolve-moved(end-pos, last-pos, dir) = {
+#let _resolve-moved(end-pos, last-pos, dir) = {
   if end-pos.x == auto {
     end-pos.x = if dir == dirs.E or dir == dirs.W {
       last-pos.x + end-pos.dx
@@ -88,7 +85,7 @@
   end-pos
 }
 
-#let extract-stations(points, line-num) = {
+#let _extract-stations(points, line-num) = {
   assert(points.len() >= 2, message: "The metro line must have at least two points!")
 
   let last-pin = points.at(0) // resolved point
@@ -108,7 +105,7 @@
     }
     let cur-point = points.at(j) // a pin
 
-    let end-pos = resolve-moved(cur-point, last-pin, cur-point.d)
+    let end-pos = _resolve-moved(cur-point, last-pin, cur-point.d)
 
     let (sx, sy) = (last-pin.x, last-pin.y)
     let (tx, ty) = (end-pos.x, end-pos.y)
@@ -122,14 +119,10 @@
       cfg: cur-cfg,
       cfg-not: cur-cfg-not,
     )
-    let q = calc.rem(int((angle + 22.5deg + 180deg) / 45.0deg), 4)
 
     // process stations on this segment
     for sta in points.slice(i, j) {
       sta.segment = segments.len()
-      if sta.anchor == auto {
-        sta.anchor = anchors.at(q)
-      }
 
       let (x, y, r, dx, dy) = sta.remove("raw-pos")
       if x == auto and dx != auto {
@@ -200,7 +193,7 @@
   default-features: (),
   ..points,
 ) = {
-  let (stations, sections, segments) = extract-stations(points.pos(), number)
+  let (stations, sections, segments) = _extract-stations(points.pos(), number)
   let station-indexer = stations.enumerate().map(((i, sta)) => (sta.id, i)).to-dict()
   (
     number: number,

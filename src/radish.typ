@@ -1,8 +1,11 @@
+/// Featuee-based metro instantiation.
+
+#import "core/anchor.typ": resolve-pending-anchors
 #import "feature.typ": resolve-enabled-features
 #import "line.typ": get-segment-of-station
 
 
-#let resolve-enabled-transfers(lines) = {
+#let _resolve-enabled-transfers(lines) = {
   let station-collection = (:) // station-id -> {line-number}
   for line in lines {
     if line.disabled { continue }
@@ -105,7 +108,8 @@
 
     metro.lines.at(i) = line
   }
-  metro.enabled-transfers = resolve-enabled-transfers(metro.lines)
+  metro.lines = resolve-pending-anchors(metro)
+  metro.enabled-transfers = _resolve-enabled-transfers(metro.lines)
 
   metro
 }

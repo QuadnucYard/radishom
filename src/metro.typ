@@ -18,7 +18,7 @@
   }
 }
 
-#let find-intersection(metro, line, sta) = {
+#let _find-intersection(metro, line, sta) = {
   // find stations of the same id
   let seg = get-segment-of-station(line, sta)
   for line-num in metro.transfers.at(sta.id) {
@@ -51,7 +51,7 @@
   return pos
 }
 
-#let resolve-transfers(lines) = {
+#let _resolve-transfers(lines) = {
   let station-collection = (:) // station-id -> {line-number}
   for line in lines {
     for station in line.stations {
@@ -67,20 +67,20 @@
   return station-collection
 }
 
-#let resolve-stations(metro) = {
+#let _resolve-stations(metro) = {
   (metro.lines.enumerate()).map(((i, line)) => {
     // set line index
     if line.index == auto {
       line.index = i
     }
+
     for (k, sta) in line.stations.enumerate() {
       // resolve station positions by intersection
       if sta.pos == auto and sta.transfer != none and sta.id in metro.transfers {
         // find transfer station with the same name on another line
-        let intersection = find-intersection(metro, line, sta)
+        let intersection = _find-intersection(metro, line, sta)
         if intersection != none {
-          sta.pos = intersection
-          line.stations.at(k).pos = sta.pos
+          line.stations.at(k).pos = intersection
         }
       }
     }
@@ -125,7 +125,7 @@
 }
 
 #let metro(lines, features: (:), default-features: ()) = {
-  let transfers = resolve-transfers(lines)
+  let transfers = _resolve-transfers(lines)
   let line-indexer = lines.enumerate().map(((i, line)) => (line.number, i)).to-dict()
   let mtr = (
     lines: lines,
@@ -134,6 +134,6 @@
     features: features,
     default-features: default-features,
   )
-  mtr.lines = resolve-stations(mtr)
+  mtr.lines = _resolve-stations(mtr)
   mtr
 }

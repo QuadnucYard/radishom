@@ -1,9 +1,10 @@
 #import "common.typ": *
 
 
+#let primary-color = rgb("#112653")
 #let normal-marker = circle(fill: white, stroke: none, radius: 2.0pt)
-#let capsule-marker = rect(width: 14pt, height: 7pt, fill: white, stroke: black + 0.75pt, radius: 3pt)
-#let circle-marker = circle(fill: white, stroke: black + 0.75pt, radius: 8pt)
+#let capsule-marker = rect(width: 14pt, height: 7pt, fill: white, stroke: primary-color + 1pt, radius: 3pt)
+#let circle-marker = circle(fill: white, stroke: primary-color + 1pt, radius: 8pt)
 
 #let marker-renderer(line, station, transfers) = {
   if transfers != none {
