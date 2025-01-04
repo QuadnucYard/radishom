@@ -1,5 +1,6 @@
 #import "../src/lib.typ": *
-#import "../src/deps.typ": cetz
+#import "../src/core/vec.typ"
+
 
 #set page(width: auto, height: auto, margin: 0pt)
 
@@ -1226,7 +1227,7 @@
     let logo-pos = station.pos
     let logo-offset = metadata.at("logo-offset", default: none)
     if logo-offset != none {
-      logo-pos = cetz.vector.add(logo-pos, logo-offset)
+      logo-pos = vec.add(logo-pos, logo-offset)
     }
     let payload = (
       body: line-logo(line.number, line.color),

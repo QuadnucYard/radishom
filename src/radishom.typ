@@ -1,6 +1,5 @@
-#import "deps.typ": cetz
+#import "core/vec.typ"
 #import "metro.typ": get-transfer-label-pos
-#import "utils.typ": average-pos
 
 
 #let radishom(
@@ -109,12 +108,12 @@
       let marker-pos = if sta.marker-pos != auto {
         sta.marker-pos
       } else if has-transfer {
-        average-pos(tr-positions)
+        vec.average(tr-positions)
       } else {
         pos
       }
       if sta.marker-offset != none {
-        marker-pos = cetz.vector.add(marker-pos, sta.marker-offset)
+        marker-pos = vec.add(marker-pos, sta.marker-offset)
       }
       if not hidden {
         let marker = marker-renderer(line-par, sta, tr-lines, tr-stations)
@@ -130,7 +129,7 @@
         pos
       }
       if sta.label-offset != none {
-        label-pos = cetz.vector.add(label-pos, sta.label-offset)
+        label-pos = vec.add(label-pos, sta.label-offset)
       }
       task.labels.push((pos: label-pos, body: label, anchor: sta.anchor, hidden: hidden))
 

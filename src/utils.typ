@@ -19,21 +19,6 @@
   return k
 }
 
-#let average-pos(positions) = {
-  let (x, y) = (0, 0)
-  let cnt = 0
-  for (x1, y1) in positions {
-    x += x1
-    y += y1
-    cnt += 1
-  }
-  if cnt > 0 {
-    x /= cnt
-    y /= cnt
-  }
-  return (x, y)
-}
-
 /// Get a suitable rotation of the transfer marker for the given station.
 #let get-preferred-angle(angles) = {
   let angles = for angle in angles {

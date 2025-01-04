@@ -1,4 +1,4 @@
-#import "deps.typ": cetz
+#import "core/vec.typ"
 
 
 /// Get a suitable position of the label for the given station based on anchor.
@@ -57,9 +57,8 @@
           }
           let sta2 = line2.stations.at(line2.station-indexer.at(sta.id))
           let seg2 = line2.segments.at(sta2.segment)
-          let pt = cetz.intersection.line-line(seg.start, seg.end, seg2.start, seg2.end)
+          let pt = vec.intersect-line-line(seg.start, seg.end, seg2.start, seg2.end)
           if pt != none {
-            let _ = pt.pop()
             intersection = pt
             break
           }
