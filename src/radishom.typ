@@ -1,6 +1,5 @@
 #import "deps.typ": cetz
-#import "line.typ": get-station-by-id
-#import "metro.typ": get-line-by-id, get-transfer-label-pos, get-transfer-marker-pos
+#import "metro.typ": get-transfer-label-pos, get-transfer-marker-pos
 
 
 #let radishom(
@@ -50,7 +49,7 @@
 
   let (min-x, min-y, max-x, max-y) = (0, 0, 0, 0)
 
-  for line in metro.lines {
+  for line in metro.lines.values() {
     if line.disabled {
       continue
     }
@@ -82,10 +81,24 @@
       max-x = calc.max(max-x, pos.at(0))
       max-y = calc.max(max-y, pos.at(1))
 
+      // extract transferred lines
+      let tr-lines = if has-transfer {
+        for line-id in metro.transfers.at(sta.id) {
+          let line = metro.lines.at(line-id)
+          ((segments: line.segments),)
+        }
+      }
+      let tr-stations = if has-transfer {
+        for line-id in metro.transfers.at(sta.id) {
+          let line = metro.lines.at(line-id)
+          (line.stations.at(line.station-indexer.at(sta.id)),)
+        }
+      }
+
       let marker-pos = if sta.marker-pos != auto {
         sta.marker-pos
       } else if has-transfer {
-        get-transfer-marker-pos(metro, sta.id)
+        get-transfer-marker-pos(tr-stations)
       } else {
         pos
       }
@@ -93,7 +106,7 @@
         marker-pos = cetz.vector.add(marker-pos, sta.marker-offset)
       }
       if not hidden {
-        let marker = marker-renderer(metro, line, sta, transfers)
+        let marker = marker-renderer(line, sta, tr-lines, tr-stations)
         task.markers.push((pos: marker-pos, body: marker))
       }
 
@@ -101,7 +114,7 @@
       let label-pos = if sta.label-pos != auto {
         sta.label-pos
       } else if has-transfer {
-        get-transfer-label-pos(metro, sta, marker-pos)
+        get-transfer-label-pos(sta, tr-stations, marker-pos)
       } else {
         pos
       }

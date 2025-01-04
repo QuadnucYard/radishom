@@ -88,7 +88,7 @@
   end-pos
 }
 
-#let _extract-stations(points, line-num) = {
+#let _extract-stations(points, line-id) = {
   assert(points.len() >= 2, message: "The metro line must have at least two points!")
 
   let last-pin = points.at(0) // resolved point
@@ -144,7 +144,7 @@
       } else if y == auto and x != auto {
         y = (x - sx) / (tx - sx) * (ty - sy) + sy
       }
-      sta.line = line-num
+      sta.line = line-id
       sta.pos = if x == auto or y == auto { auto } else { (x, y) } // mark pos auto, handle it later
       stations.push(sta)
     }
@@ -215,17 +215,4 @@
     features: features,
     default-features: default-features,
   )
-}
-
-#let get-station-by-id(line, sta-id) = {
-  let index = line.station-indexer.at(sta-id, default: none)
-  if index != none {
-    line.stations.at(index)
-  } else {
-    none
-  }
-}
-
-#let get-segment-of-station(line, sta) = {
-  line.segments.at(sta.segment)
 }

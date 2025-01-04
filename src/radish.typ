@@ -1,13 +1,12 @@
 /// Featuee-based metro instantiation.
 
-#import "core/anchor.typ": get-best-anchor
+#import "core/anchor.typ": get-best-anchor, get-best-anchor-tr
 #import "feature.typ": resolve-enabled-features
-#import "line.typ": get-segment-of-station
 
 
 #let _resolve-enabled-transfers(lines) = {
   let station-collection = (:) // station-id -> {line-number}
-  for line in lines {
+  for line in lines.values() {
     if line.disabled { continue }
     for station in line.stations {
       if not station.disabled and station.transfer != none {
@@ -23,16 +22,22 @@
 }
 
 #let _resolve-pending-station-attrs(metro) = {
-  (metro.lines.enumerate()).map(((i, line)) => {
+  let lines = for (i, line) in metro.lines {
     for (k, sta) in line.stations.enumerate() {
       // set station anchor
       if sta.anchor == auto {
-        line.stations.at(k).anchor = get-best-anchor(metro, line, sta)
+        line.stations.at(k).anchor = if sta.transfer == none or sta.id not in metro.enabled-transfers {
+          get-best-anchor(line, sta)
+        } else {
+          let tr-lines = for line-id in metro.enabled-transfers.at(sta.id) { (metro.lines.at(line-id),) }
+          get-best-anchor-tr(tr-lines, sta.id)
+        }
       }
     }
 
-    return line
-  })
+    ((line.number, line),)
+  }
+  lines.to-dict()
 }
 
 /// Instantiate a metro system with given features.
@@ -56,7 +61,7 @@
     if default-features { features + metro.default-features } else { features },
   )
   // we should remove unavailable transfer stations here
-  for (i, line) in metro.lines.enumerate() {
+  for (i, line) in metro.lines {
     let enabled-features = (
       global-enabled-features
         + resolve-enabled-features(
@@ -110,7 +115,7 @@
         if j >= line.stations.len() { break }
         let first-enabled = j
         let last-enabled = j
-        while j < line.stations.len() and not get-segment-of-station(line, line.stations.at(j)).disabled {
+        while j < line.stations.len() and not line.segments.at(line.stations.at(j).segment).disabled {
           last-enabled = j
           j += 1
         }

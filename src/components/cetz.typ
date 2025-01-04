@@ -2,8 +2,8 @@
 #import "common.typ": *
 
 
-#let marker-renderer(metro, line, station, transfers) = {
-  if transfers != none {
+#let marker-renderer(line, station, tr-lines, tr-stations) = {
+  if tr-lines != none {
     cetz.draw.circle((), fill: white, stroke: black + 1pt, radius: 6pt)
   } else if "terminal" in station {
     cetz.draw.circle((), fill: white, stroke: line.color + 1.0pt, radius: 4pt)

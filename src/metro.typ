@@ -1,31 +1,13 @@
 #import "deps.typ": cetz
-#import "line.typ": get-segment-of-station, get-station-by-id
 
 
-#let get-line-by-id(metro, line-num) = {
-  let index = metro.line-indexer.at(line-num, default: none)
-  if index != none {
-    return metro.lines.at(index)
-  }
-}
-
-#let get-line-station-by-id(metro, line-num, station-id) = {
-  let line = get-line-by-id(metro, line-num)
-  if line != none {
-    get-station-by-id(line, station-id)
-  } else {
-    none
-  }
-}
-
-#let _find-intersection(metro, line, sta) = {
+#let _find-intersection(line, sta, tr-lines) = {
   // find stations of the same id
-  let seg = get-segment-of-station(line, sta)
-  for line-num in metro.transfers.at(sta.id) {
-    if line-num == line.number { continue }
-    let line2 = get-line-by-id(metro, line-num)
-    let sta2 = get-station-by-id(line2, sta.id)
-    let seg2 = get-segment-of-station(line2, sta2)
+  let seg = line.segments.at(sta.segment)
+  for line2 in tr-lines {
+    if line2.number == line.number { continue }
+    let sta2 = line2.stations.at(line2.station-indexer.at(sta.id))
+    let seg2 = line2.segments.at(sta2.segment)
     let intersection = cetz.intersection.line-line(seg.start, seg.end, seg2.start, seg2.end)
     if intersection != none {
       intersection.pop()
@@ -36,17 +18,12 @@
 }
 
 /// Get a suitable position of the transfer marker for the given station.
-#let get-transfer-marker-pos(metro, station-id) = {
+#let get-transfer-marker-pos(tr-stations) = {
   let pos = (0, 0)
   let cnt = 0
-  for line-num in metro.enabled-transfers.at(station-id) {
-    let line = get-line-by-id(metro, line-num)
-    if line.disabled { continue }
-    let sta = get-station-by-id(line, station-id)
-    if sta != none and not sta.disabled {
-      pos = cetz.vector.add(pos, sta.pos)
-      cnt += 1
-    }
+  for sta in tr-stations {
+    pos = cetz.vector.add(pos, sta.pos)
+    cnt += 1
   }
   if cnt > 0 {
     pos = cetz.vector.div(pos, cnt)
@@ -55,10 +32,8 @@
 }
 
 /// Get a suitable rotation of the transfer marker for the given station.
-#let get-transfer-marker-rot(metro, station-id, transfers) = {
-  let angles = for line-id in transfers {
-    let line = get-line-by-id(metro, line-id)
-    let sta = get-station-by-id(line, station-id)
+#let get-transfer-marker-rot(station-id, tr-lines, tr-stations) = {
+  let angles = for (line, sta) in tr-lines.zip(tr-stations) {
     let angle = line.segments.at(sta.segment).angle
     if angle <= -90deg { angle += 180deg }
     if angle > 90deg { angle -= 180deg }
@@ -79,12 +54,10 @@
 }
 
 /// Get a suitable position of the label for the given station based on anchor.
-#let get-transfer-label-pos(metro, station, hint) = {
+#let get-transfer-label-pos(station, tr-stations, hint) = {
   let (x, y) = hint
   let anchor = station.anchor
-  for line-num in metro.enabled-transfers.at(station.id) {
-    let line = get-line-by-id(metro, line-num)
-    let sta = get-station-by-id(line, station.id)
+  for sta in tr-stations {
     let (x1, y1) = sta.pos
     if "west" in anchor {
       x = calc.max(x, x1)
@@ -117,7 +90,7 @@
 }
 
 #let _resolve-stations(metro) = {
-  (metro.lines.enumerate()).map(((i, line)) => {
+  let lines = for (i, line) in metro.lines {
     // set line index
     if line.index == auto {
       line.index = i
@@ -127,7 +100,8 @@
       // resolve station positions by intersection
       if sta.pos == auto and sta.transfer != none and sta.id in metro.transfers {
         // find transfer station with the same name on another line
-        let intersection = _find-intersection(metro, line, sta)
+        let tr-lines = for line-id in metro.transfers.at(sta.id) { (metro.lines.at(line-id),) }
+        let intersection = _find-intersection(line, sta, tr-lines)
         if intersection != none {
           line.stations.at(k).pos = intersection
         }
@@ -169,16 +143,15 @@
       }
     }
 
-    return line
-  })
+    ((line.number, line),)
+  }
+  lines.to-dict()
 }
 
 #let metro(lines, features: (:), default-features: ()) = {
   let transfers = _resolve-transfers(lines)
-  let line-indexer = lines.enumerate().map(((i, line)) => (line.number, i)).to-dict()
   let mtr = (
-    lines: lines,
-    line-indexer: line-indexer,
+    lines: lines.map(line => (line.number, line)).to-dict(),
     transfers: transfers,
     features: features,
     default-features: default-features,

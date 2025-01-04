@@ -1,7 +1,5 @@
 #import "../deps.typ": cetz
 #import "../dir.typ": dirs
-#import "../line.typ": get-segment-of-station, get-station-by-id
-#import "../metro.typ": get-line-by-id
 #import "../utils.typ": min-index
 
 
@@ -9,12 +7,11 @@
 #let _anchor-orders = (0, 2, 1, 3)
 
 /// Find a best anchor placement with least punishment.
-#let _get-best-anchor-tr(metro, sta-id) = {
+#let get-best-anchor-tr(tr-lines, sta-id) = {
   let punishment = (0, 1) * 4 // for 0deg, 45deg, ..., 315deg; prefer ortho
-  for line-id in metro.transfers.at(sta-id) {
-    let line2 = get-line-by-id(metro, line-id)
+  for line2 in tr-lines {
     if line2.disabled { continue }
-    let sta2 = get-station-by-id(line2, sta-id)
+    let sta2 = line2.stations.at(line2.station-indexer.at(sta-id))
     if sta2.disabled { continue }
     let seg = line2.segments.at(sta2.segment)
     if seg.disabled { continue }
@@ -59,12 +56,9 @@
   return _anchors.at(min-index(punishment))
 }
 
-#let get-best-anchor(metro, line, sta) = {
-  if sta.transfer == none or sta.id not in metro.transfers {
-    let angle = line.segments.at(sta.segment).angle + 90deg
-    if angle <= -22.5deg { angle += 180deg }
-    let q = calc.rem(int((angle + 22.5deg) / 45.0deg), 4)
-    return _anchors.at(q)
-  }
-  return _get-best-anchor-tr(metro, sta.id)
+#let get-best-anchor(line, sta) = {
+  let angle = line.segments.at(sta.segment).angle + 90deg
+  if angle <= -22.5deg { angle += 180deg }
+  let q = calc.rem(int((angle + 22.5deg) / 45.0deg), 4)
+  return _anchors.at(q)
 }
