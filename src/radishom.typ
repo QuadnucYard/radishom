@@ -82,10 +82,15 @@
       max-x = calc.max(max-x, pos.at(0))
       max-y = calc.max(max-y, pos.at(1))
 
-      let marker-pos = if has-transfer {
+      let marker-pos = if sta.marker-pos != auto {
+        sta.marker-pos
+      } else if has-transfer {
         get-transfer-marker-pos(metro, sta.id)
       } else {
         pos
+      }
+      if sta.marker-offset != none {
+        marker-pos = cetz.vector.add(marker-pos, sta.marker-offset)
       }
       if not hidden {
         let marker = marker-renderer(metro, line, sta, transfers)
@@ -93,10 +98,15 @@
       }
 
       let label = label-renderer(sta)
-      let label-pos = if has-transfer {
+      let label-pos = if sta.label-pos != auto {
+        sta.label-pos
+      } else if has-transfer {
         get-transfer-label-pos(metro, sta, marker-pos)
       } else {
         pos
+      }
+      if sta.label-offset != none {
+        label-pos = cetz.vector.add(label-pos, sta.label-offset)
       }
       task.labels.push((pos: label-pos, body: label, anchor: sta.anchor, hidden: hidden))
 

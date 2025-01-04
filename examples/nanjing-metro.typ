@@ -1,4 +1,5 @@
 #import "../src/lib.typ": *
+#import "../src/deps.typ": cetz
 
 #set page(width: auto, height: auto, margin: 0pt)
 
@@ -272,7 +273,7 @@
     pin-round(x: 2.5, d: W),
     pin-round(y: -16., d: S),
     station([九龙湖南], [JIULONGHUNAN], x: 1.),
-    station([吉印大道], [JIYINDADAO], logo-anchor: E),
+    station([吉印大道], [JIYINDADAO], logo-anchor: SE),
     pin(x: -0.5, d: W),
   ),
   line(
@@ -325,7 +326,7 @@
     features: ("L7-full": ("L7-N", "L7-S", "L7-M")),
 
     pin(x: 10., y: 9., cfg: "L7-N"),
-    station([仙新路], [XIANXINLU], marker-rotation: -45deg, logo-anchor: SW),
+    station([仙新路], [XIANXINLU], marker-rotation: -45deg, logo-anchor: N, logo-offset: (0, -0.1)),
     station([尧化门], [YAOHUAMEN]),
     station([尧化新村], [YAOHUAXINCUN]),
     station([丁家庄南], [DINGJIAZHUANGNAN], y: 6.5),
@@ -581,7 +582,7 @@
     pin-round(y: -14.0, d: S),
     station([河海大学·佛城西路], [HHU/FOCHENGXILU], anchor: NW),
     station([康厚街], [KANGHOUJIE]),
-    station([牛首山], [NIUSHOUSHAN], logo-anchor: E),
+    station([牛首山], [NIUSHOUSHAN], logo-anchor: N),
     pin(x: -3.0, d: W),
   ),
   line(
@@ -616,7 +617,7 @@
     pin-round(x: 6.5, d: E),
     station([胜利村], [SHENGLICUN]),
     pin-round(y: -3.5 + 0.14, d: S),
-    station([高桥门], [GAOQIAOMEN], logo-anchor: S),
+    station([高桥门], [GAOQIAOMEN], logo-anchor: S, logo-offset: (-0.2, 0)),
     pin(dx: -0.8, d: SW),
   ),
   line(
@@ -1222,9 +1223,14 @@
 #let draw-line-logo(line, station) = {
   let metadata = station.metadata.named()
   if "terminal" in station and "logo-anchor" in metadata and metadata.logo-anchor != none {
+    let logo-pos = station.pos
+    let logo-offset = metadata.at("logo-offset", default: none)
+    if logo-offset != none {
+      logo-pos = cetz.vector.add(logo-pos, logo-offset)
+    }
     let payload = (
       body: line-logo(line.number, line.color),
-      pos: station.pos,
+      pos: logo-pos,
       anchor: metadata.logo-anchor,
     )
     payload
