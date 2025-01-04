@@ -30,8 +30,12 @@
           let seg = line.segments.at(sta.segment)
           get-best-anchor(seg)
         } else {
-          let tr-lines = for line-id in metro.enabled-transfers.at(sta.id) { (metro.lines.at(line-id),) }
-          get-best-anchor-tr(tr-lines, sta.id)
+          let tr-ctx = for line-id in metro.enabled-transfers.at(sta.id) {
+            let line2 = metro.lines.at(line-id)
+            let sta2 = line2.stations.at(line2.station-indexer.at(sta.id))
+            ((pos: sta2.pos, seg-idx: sta2.segment, segments: line2.segments),)
+          }
+          get-best-anchor-tr(tr-ctx)
         }
       }
     }

@@ -1,51 +1,10 @@
 #import "deps.typ": cetz
 
 
-/// Get a suitable position of the transfer marker for the given station.
-#let get-transfer-marker-pos(tr-stations) = {
-  let (x, y) = (0, 0)
-  let cnt = 0
-  for sta in tr-stations {
-    let (x1, y1) = sta.pos
-    x += x1
-    y += y1
-    cnt += 1
-  }
-  if cnt > 0 {
-    x /= cnt
-    y /= cnt
-  }
-  return (x, y)
-}
-
-/// Get a suitable rotation of the transfer marker for the given station.
-#let get-transfer-marker-rot(station-id, tr-lines, tr-stations) = {
-  let angles = for (line, sta) in tr-lines.zip(tr-stations) {
-    let angle = line.segments.at(sta.segment).angle
-    if angle <= -90deg { angle += 180deg }
-    if angle > 90deg { angle -= 180deg }
-    (angle,)
-  }
-  return if angles.dedup().len() == 1 {
-    // parallel case
-    angles.at(0) + 90deg
-  } else if angles.contains(0deg) {
-    // prefer horizontal
-    0deg
-  } else if angles.contains(90deg) {
-    90deg
-  } else {
-    // along the direction of the first line
-    angles.at(0)
-  }
-}
-
 /// Get a suitable position of the label for the given station based on anchor.
-#let get-transfer-label-pos(station, tr-stations, hint) = {
+#let get-transfer-label-pos(anchor, tr-positions, hint) = {
   let (x, y) = hint
-  let anchor = station.anchor
-  for sta in tr-stations {
-    let (x1, y1) = sta.pos
+  for (x1, y1) in tr-positions {
     if "west" in anchor {
       x = calc.max(x, x1)
     } else if "east" in anchor {

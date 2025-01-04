@@ -1,5 +1,5 @@
 #import "common.typ": *
-#import "../metro.typ": get-transfer-marker-rot as _get-transfer-marker-rot
+#import "../utils.typ": get-preferred-angle as _get-preferred-angle
 
 
 #let primary-color = rgb("#112653")
@@ -23,7 +23,10 @@
   if tr-lines.len() == 2 {
     let angle = station.metadata.at("marker-rotation", default: none)
     if angle == none {
-      angle = _get-transfer-marker-rot(station.id, tr-lines, tr-stations)
+      let angles = for (line2, sta2) in tr-lines.zip(tr-stations) {
+        (line2.segments.at(sta2.segment).angle,)
+      }
+      angle = _get-preferred-angle(angles)
     }
     show: rotate.with(-angle)
     capsule-marker

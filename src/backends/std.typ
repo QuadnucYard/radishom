@@ -32,8 +32,8 @@
 
 /// Place an element on the canvas with given position.
 #let _draw(element, pos, u) = {
-  let (x, y) = _cpos(pos, u)
-  place(element, dx: x, dy: y)
+  let (x, y) = pos
+  place(element, dx: x * u, dy: y * -u)
 }
 
 #let _draw-grid(grid, u) = {
@@ -68,8 +68,8 @@
   let ct-x2 = (x0 - arc-x2) * 0.5
   let ct-y2 = (y0 - arc-y2) * 0.5
   (
-    (_cpos((arc-x1, arc-y1), u), (0pt, 0pt), _cpos((ct-x1, ct-y1), u)),
-    (_cpos((arc-x2, arc-y2), u), _cpos((ct-x2, ct-y2), u), (0pt, 0pt)),
+    ((arc-x1 * u, arc-y1 * -u), (0pt, 0pt), (ct-x1 * u, ct-y1 * -u)),
+    ((arc-x2 * u, arc-y2 * -u), (ct-x2 * u, ct-y2 * -u), (0pt, 0pt)),
   )
 }
 
@@ -85,7 +85,8 @@
       let p2 = extract(points.at(i + 1))
       _round-corner(pt, p1, p2, radius, u)
     } else {
-      (_cpos(pt, u),)
+      let (x, y) = pt
+      ((x * u, y * -u),)
     }
   }
 }

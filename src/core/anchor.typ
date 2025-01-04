@@ -6,26 +6,24 @@
 #let _anchor-orders = (0, 2, 1, 3)
 
 /// Find a best anchor placement with least punishment.
-#let get-best-anchor-tr(tr-lines, sta-id) = {
+#let get-best-anchor-tr(tr-ctx) = {
   let punishment = (0, 1) * 4 // for 0deg, 45deg, ..., 315deg; prefer ortho
-  for line2 in tr-lines {
-    let sta2 = line2.stations.at(line2.station-indexer.at(sta-id))
-    let seg = line2.segments.at(sta2.segment)
-    let pos = sta2.pos
+  for (pos, seg-idx, segments) in tr-ctx {
+    let seg = segments.at(seg-idx)
 
     // collect ray targets
     let targets = ()
     if pos != seg.start {
       targets.push(seg.start)
-    } else if sta2.segment > 0 {
+    } else if seg-idx > 0 {
       // consider previous segment
-      targets.push(line2.segments.at(sta2.segment - 1).start)
+      targets.push(segments.at(seg-idx - 1).start)
     }
     if pos != seg.end {
       targets.push(seg.end)
-    } else if sta2.segment + 1 < line2.segments.len() {
+    } else if seg-idx + 1 < segments.len() {
       // consider next segment
-      targets.push(line2.segments.at(sta2.segment + 1).end)
+      targets.push(segments.at(seg-idx + 1).end)
     }
 
     for target in targets {

@@ -1,5 +1,6 @@
 #import "deps.typ": cetz
-#import "metro.typ": get-transfer-label-pos, get-transfer-marker-pos
+#import "metro.typ": get-transfer-label-pos
+#import "utils.typ": average-pos
 
 
 #let radishom(
@@ -82,7 +83,7 @@
       let hidden = sta.hidden or is-not-first-transfer
 
       let pos = sta.pos
-      assert(pos != auto and pos.at(0) != auto, message: repr(sta))
+      assert(pos != auto and pos.at(0) != auto)
       min-x = calc.min(min-x, pos.at(0))
       min-y = calc.min(min-y, pos.at(1))
       max-x = calc.max(max-x, pos.at(0))
@@ -101,11 +102,14 @@
           (line.stations.at(line.station-indexer.at(sta.id)),)
         }
       }
+      let tr-positions = if has-transfer {
+        for sta2 in tr-stations { (sta2.pos,) }
+      }
 
       let marker-pos = if sta.marker-pos != auto {
         sta.marker-pos
       } else if has-transfer {
-        get-transfer-marker-pos(tr-stations)
+        average-pos(tr-positions)
       } else {
         pos
       }
@@ -121,7 +125,7 @@
       let label-pos = if sta.label-pos != auto {
         sta.label-pos
       } else if has-transfer {
-        get-transfer-label-pos(sta, tr-stations, marker-pos)
+        get-transfer-label-pos(sta.anchor, tr-positions, marker-pos)
       } else {
         pos
       }
