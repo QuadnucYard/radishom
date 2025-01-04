@@ -19,16 +19,19 @@
 
 /// Get a suitable position of the transfer marker for the given station.
 #let get-transfer-marker-pos(tr-stations) = {
-  let pos = (0, 0)
+  let (x, y) = (0, 0)
   let cnt = 0
   for sta in tr-stations {
-    pos = cetz.vector.add(pos, sta.pos)
+    let (x1, y1) = sta.pos
+    x += x1
+    y += y1
     cnt += 1
   }
   if cnt > 0 {
-    pos = cetz.vector.div(pos, cnt)
+    x /= cnt
+    y /= cnt
   }
-  return pos
+  return (x, y)
 }
 
 /// Get a suitable rotation of the transfer marker for the given station.
@@ -133,12 +136,12 @@
             break
           }
         }
-        let pos = cetz.vector.lerp(
-          last-known,
-          next-known,
-          (k - last-known-index) / (next-known-index - last-known-index),
-        )
-        let xx = (sta.id, pos)
+        let pos = {
+          let (x1, y1) = last-known
+          let (x2, y2) = next-known
+          let t = (k - last-known-index) / (next-known-index - last-known-index)
+          (x1 + (x2 - x1) * t, y1 + (y2 - y1) * t)
+        }
         line.stations.at(start-idx + k).pos = pos
       }
     }

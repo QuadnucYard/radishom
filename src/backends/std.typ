@@ -1,4 +1,3 @@
-#import "../deps.typ": cetz
 #import "../dir.typ": dirs
 
 
@@ -53,16 +52,24 @@
 }
 
 #let _round-corner(pt, p1, p2, radius, u) = {
-  let d1 = cetz.vector.dist(p1, pt)
-  let d2 = cetz.vector.dist(p2, pt)
+  // here we avoid func-call to improve performance
+  let (x0, y0) = pt
+  let (x1, y1) = p1
+  let (x2, y2) = p2
+  let d1 = calc.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0))
+  let d2 = calc.sqrt((x2 - x0) * (x2 - x0) + (y2 - y0) * (y2 - y0))
   let radius = calc.min(radius, d1 / 2, d2 / 2) // clamp radius
-  let p1x = cetz.vector.lerp(pt, p1, radius / d1) // arc point 1
-  let p2x = cetz.vector.lerp(pt, p2, radius / d2) // arc point 2
-  let p1m = cetz.vector.lerp(pt, p1x, 0.5)
-  let p2m = cetz.vector.lerp(pt, p2x, 0.5)
+  let arc-x1 = x0 + (x1 - x0) * radius / d1 // arc point 1
+  let arc-y1 = y0 + (y1 - y0) * radius / d1
+  let arc-x2 = x0 + (x2 - x0) * radius / d2 // arc point 2
+  let arc-y2 = y0 + (y2 - y0) * radius / d2
+  let ct-x1 = (x0 - arc-x1) * 0.5
+  let ct-y1 = (y0 - arc-y1) * 0.5
+  let ct-x2 = (x0 - arc-x2) * 0.5
+  let ct-y2 = (y0 - arc-y2) * 0.5
   (
-    (_cpos(p1x, u), (0pt, 0pt), _cpos(cetz.vector.sub(p1m, p1x), u)),
-    (_cpos(p2x, u), _cpos(cetz.vector.sub(p2m, p2x), u), (0pt, 0pt)),
+    (_cpos((arc-x1, arc-y1), u), (0pt, 0pt), _cpos((ct-x1, ct-y1), u)),
+    (_cpos((arc-x2, arc-y2), u), _cpos((ct-x2, ct-y2), u), (0pt, 0pt)),
   )
 }
 

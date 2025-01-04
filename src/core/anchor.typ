@@ -1,4 +1,3 @@
-#import "../deps.typ": cetz
 #import "../dir.typ": dirs
 #import "../utils.typ": min-index
 
@@ -19,13 +18,13 @@
 
     // collect ray targets
     let targets = ()
-    if cetz.vector.dist(pos, seg.start) > 1e-1 {
+    if pos != seg.start {
       targets.push(seg.start)
     } else if sta2.segment > 0 {
       // consider previous segment
       targets.push(line2.segments.at(sta2.segment - 1).start)
     }
-    if cetz.vector.dist(pos, seg.end) > 1e-1 {
+    if pos != seg.end {
       targets.push(seg.end)
     } else if sta2.segment + 1 < line2.segments.len() {
       // consider next segment
