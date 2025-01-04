@@ -54,7 +54,14 @@
       continue
     }
 
-    let line-stroke = line-stroker(line)
+    let line-par = (
+      number: line.number,
+      color: line.color,
+      index: line.index,
+      segments: line.segments,
+    ) // partial line used as arg
+
+    let line-stroke = line-stroker(line-par)
     for sec in line.sections {
       if not sec.disabled {
         task.lines.push((points: sec.points, stroke: line-stroke, layer: sec.layer))
@@ -85,7 +92,7 @@
       let tr-lines = if has-transfer {
         for line-id in metro.transfers.at(sta.id) {
           let line = metro.lines.at(line-id)
-          ((segments: line.segments),)
+          ((number: line.number, color: line.color, index: line.index, segments: line.segments),)
         }
       }
       let tr-stations = if has-transfer {
@@ -106,7 +113,7 @@
         marker-pos = cetz.vector.add(marker-pos, sta.marker-offset)
       }
       if not hidden {
-        let marker = marker-renderer(line, sta, tr-lines, tr-stations)
+        let marker = marker-renderer(line-par, sta, tr-lines, tr-stations)
         task.markers.push((pos: marker-pos, body: marker))
       }
 
@@ -124,7 +131,7 @@
       task.labels.push((pos: label-pos, body: label, anchor: sta.anchor, hidden: hidden))
 
       for plugin in station-plugins {
-        let fg = plugin(line, sta)
+        let fg = plugin(line-par, sta)
         if fg != none {
           task.foreground.push(fg)
         }
@@ -132,7 +139,7 @@
     }
 
     for plugin in line-plugins {
-      let fg = plugin(line)
+      let fg = plugin(line-par)
       if fg != none {
         task.foreground.push(fg)
       }

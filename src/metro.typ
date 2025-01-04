@@ -1,22 +1,6 @@
 #import "deps.typ": cetz
 
 
-#let _find-intersection(line, sta, tr-lines) = {
-  // find stations of the same id
-  let seg = line.segments.at(sta.segment)
-  for line2 in tr-lines {
-    if line2.number == line.number { continue }
-    let sta2 = line2.stations.at(line2.station-indexer.at(sta.id))
-    let seg2 = line2.segments.at(sta2.segment)
-    let intersection = cetz.intersection.line-line(seg.start, seg.end, seg2.start, seg2.end)
-    if intersection != none {
-      intersection.pop()
-      return intersection
-    }
-  }
-  return none
-}
-
 /// Get a suitable position of the transfer marker for the given station.
 #let get-transfer-marker-pos(tr-stations) = {
   let (x, y) = (0, 0)
@@ -103,8 +87,25 @@
       // resolve station positions by intersection
       if sta.pos == auto and sta.transfer != none and sta.id in metro.transfers {
         // find transfer station with the same name on another line
-        let tr-lines = for line-id in metro.transfers.at(sta.id) { (metro.lines.at(line-id),) }
-        let intersection = _find-intersection(line, sta, tr-lines)
+        let intersection = none
+
+        let seg = line.segments.at(sta.segment)
+        for line-id in metro.transfers.at(sta.id) {
+          let line2 = metro.lines.at(line-id)
+          if line2.number != line.number {
+            let sta2 = line2.stations.at(line2.station-indexer.at(sta.id))
+            let seg2 = line2.segments.at(sta2.segment)
+          }
+          let sta2 = line2.stations.at(line2.station-indexer.at(sta.id))
+          let seg2 = line2.segments.at(sta2.segment)
+          let pt = cetz.intersection.line-line(seg.start, seg.end, seg2.start, seg2.end)
+          if pt != none {
+            let _ = pt.pop()
+            intersection = pt
+            break
+          }
+        }
+
         if intersection != none {
           line.stations.at(k).pos = intersection
         }

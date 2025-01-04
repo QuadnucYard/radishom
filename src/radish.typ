@@ -27,7 +27,8 @@
       // set station anchor
       if sta.anchor == auto {
         line.stations.at(k).anchor = if sta.transfer == none or sta.id not in metro.enabled-transfers {
-          get-best-anchor(line, sta)
+          let seg = line.segments.at(sta.segment)
+          get-best-anchor(seg)
         } else {
           let tr-lines = for line-id in metro.enabled-transfers.at(sta.id) { (metro.lines.at(line-id),) }
           get-best-anchor-tr(tr-lines, sta.id)
@@ -60,6 +61,7 @@
     metro.features,
     if default-features { features + metro.default-features } else { features },
   )
+
   // we should remove unavailable transfer stations here
   for (i, line) in metro.lines {
     let enabled-features = (

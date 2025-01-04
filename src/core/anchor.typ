@@ -9,11 +9,8 @@
 #let get-best-anchor-tr(tr-lines, sta-id) = {
   let punishment = (0, 1) * 4 // for 0deg, 45deg, ..., 315deg; prefer ortho
   for line2 in tr-lines {
-    if line2.disabled { continue }
     let sta2 = line2.stations.at(line2.station-indexer.at(sta-id))
-    if sta2.disabled { continue }
     let seg = line2.segments.at(sta2.segment)
-    if seg.disabled { continue }
     let pos = sta2.pos
 
     // collect ray targets
@@ -55,8 +52,8 @@
   return _anchors.at(min-index(punishment))
 }
 
-#let get-best-anchor(line, sta) = {
-  let angle = line.segments.at(sta.segment).angle + 90deg
+#let get-best-anchor(seg) = {
+  let angle = seg.angle + 90deg
   if angle <= -22.5deg { angle += 180deg }
   let q = calc.rem(int((angle + 22.5deg) / 45.0deg), 4)
   return _anchors.at(q)
