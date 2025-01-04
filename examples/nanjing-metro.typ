@@ -656,7 +656,7 @@
     color: rgb("#ee7852"),
     optional: true,
 
-    pin(x: -12 - 0.1, y: 12),
+    pin(x: -12 - 0.1, y: 12, layer: -5),
     station([南京北站], [NANJING NORTH RAILWAY STATION], logo-anchor: NE),
 
     pin-round(y: 11.0 - 0.3, d: S, corner-radius: 0.25),

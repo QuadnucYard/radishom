@@ -9,6 +9,8 @@
   dy: auto,
   d: auto,
   pin: none,
+  end: false,
+  layer: auto,
   cfg: auto,
   cfg-not: auto,
   corner-radius: none,
@@ -21,6 +23,7 @@
     d: d,
     pin: pin,
     end: end,
+    layer: layer,
     cfg: cfg,
     cfg-not: cfg-not,
     corner-radius: corner-radius,
@@ -91,6 +94,7 @@
   let last-pin = points.at(0) // resolved point
   let cur-cfg = if last-pin.cfg == auto { none } else { last-pin.cfg }
   let cur-cfg-not = if last-pin.cfg-not == auto { none } else { last-pin.cfg-not }
+  let cur-layer = if last-pin.layer == auto { 0 } else { last-pin.layer }
 
   let sections = ()
   let section-points = ((last-pin.x, last-pin.y),)
@@ -116,6 +120,7 @@
       end: (tx, ty),
       angle: angle,
       range: (start: stations.len(), end: stations.len() + j - i),
+      layer: cur-layer,
       cfg: cur-cfg,
       cfg-not: cur-cfg-not,
     )
@@ -147,6 +152,9 @@
 
     // update current pin and cfg
     last-pin = end-pos
+    if last-pin.layer != auto {
+      cur-cfg-not = last-pin.layer
+    }
     if last-pin.cfg != auto {
       cur-cfg = last-pin.cfg
     }
@@ -160,15 +168,15 @@
     } else {
       (seg.end, end-pos.corner-radius)
     })
-    if seg.cfg != cur-cfg or seg.cfg-not != cur-cfg-not {
-      sections.push((points: section-points, cfg: seg.cfg))
+    if seg.cfg != cur-cfg or seg.cfg-not != cur-cfg-not or seg.layer != cur-layer {
+      sections.push((points: section-points, layer: seg.layer, cfg: seg.cfg, cfg-not: seg.cfg-not))
       section-points = (seg.end,)
     }
 
     i = j + 1
   }
   if section-points.len() > 0 {
-    sections.push((points: section-points, cfg: cur-cfg))
+    sections.push((points: section-points, layer: cur-layer, cfg: cur-cfg, cfg-not: cur-cfg-not))
   }
 
   // Set positions for terminal stations

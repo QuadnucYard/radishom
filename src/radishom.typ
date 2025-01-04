@@ -58,7 +58,7 @@
     let line-stroke = line-stroker(line)
     for sec in line.sections {
       if not sec.disabled {
-        task.lines.push((points: sec.points, stroke: line-stroke))
+        task.lines.push((points: sec.points, stroke: line-stroke, layer: sec.layer))
       }
     }
 

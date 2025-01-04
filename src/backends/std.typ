@@ -115,7 +115,7 @@
     _draw-grid(task.grid, unit-length)
   }
 
-  for line in task.lines {
+  for line in task.lines.sorted(key: l => l.layer) {
     let points = _make-curved(line.points, unit-length)
     place(path(..points, stroke: line.stroke))
   }
