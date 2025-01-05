@@ -10,7 +10,7 @@
   dx: auto,
   dy: auto,
   r: auto,
-  offset: (0, 0),
+  offset: none,
   anchor: auto,
   hidden: false,
   transfer: auto,
@@ -18,7 +18,6 @@
   marker-offset: none,
   label-pos: auto,
   label-offset: none,
-  pin: none,
   cfg: none,
   cfg-not: none,
   ..metadata,
@@ -26,22 +25,22 @@
   if id == auto {
     id = if type(name) == str { name } else { name.text }
   }
-  (
+  let data = (
     id: id,
     name: name,
     subname: subname,
     raw-pos: (x: x, y: y, dx: dx, dy: dy, r: r),
-    offset: offset,
     anchor: anchor,
-    hidden: hidden,
     transfer: transfer,
-    marker-pos: marker-pos,
-    marker-offset: marker-offset,
-    label-pos: label-pos,
-    label-offset: label-offset,
-    pin: pin,
-    cfg: cfg,
-    cfg-not: cfg-not,
     metadata: metadata,
   )
+  if offset != none { data.offset = offset }
+  if hidden != false { data.hidden = hidden }
+  if marker-pos != auto { data.marker-pos = marker-pos }
+  if marker-offset != none { data.marker-offset = marker-offset }
+  if label-pos != auto { data.label-pos = label-pos }
+  if label-offset != none { data.label-offset = label-offset }
+  if cfg != none { data.cfg = cfg }
+  if cfg-not != none { data.cfg-not = cfg-not }
+  data
 }

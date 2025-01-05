@@ -11,7 +11,7 @@
 
 #let lines = (
   line(
-    number: "1",
+    id: "1",
     color: rgb("#009ace"),
 
     pin(x: 5., y: 11., cfg: "L1-N"),
@@ -62,7 +62,7 @@
     pin(y: -15., d: SE),
   ),
   line(
-    number: "2",
+    id: "2",
     color: rgb("#a6093d"),
 
     pin(x: -12., y: -8.5, cfg: "L2-W"),
@@ -115,7 +115,7 @@
     pin(y: 8., d: N),
   ),
   line(
-    number: "3",
+    id: "3",
     color: rgb("#009a44"),
 
     pin(x: -11, y: 12.),
@@ -166,7 +166,7 @@
     pin(y: -19., d: S),
   ),
   line(
-    number: "4",
+    id: "4",
     color: rgb("#7d55c7"),
 
     pin(x: -12., y: 13., cfg: "L4-3"),
@@ -230,7 +230,7 @@
     pin(x: 20.0, d: E),
   ),
   line(
-    number: "5",
+    id: "5",
     color: rgb("#fdda24"),
     optional: true,
 
@@ -278,7 +278,7 @@
     pin(x: -0.5, d: W),
   ),
   line(
-    number: "6",
+    id: "6",
     color: rgb("#4bbbb4"),
     optional: true,
 
@@ -321,7 +321,7 @@
     pin(x: 19.0, d: E),
   ),
   line(
-    number: "7",
+    id: "7",
     color: rgb("#4a7729"),
     optional: true,
     features: ("L7-full": ("L7-N", "L7-S", "L7-M")),
@@ -370,7 +370,7 @@
     pin(y: -10. + 0.07, d: SW),
   ),
   line(
-    number: "8",
+    id: "8",
     color: rgb("#ab2328"),
     optional: true,
 
@@ -416,7 +416,7 @@
     pin(y: 10., d: N),
   ),
   line(
-    number: "9",
+    id: "9",
     color: rgb("#fa4616"),
     optional: true,
 
@@ -470,7 +470,7 @@
     pin(x: -10.0, d: E),
   ),
   line(
-    number: "10",
+    id: "10",
     color: rgb("#b9975b"),
     optional: true,
 
@@ -516,7 +516,7 @@
     pin(x: 9.5, d: E),
   ),
   line(
-    number: "11",
+    id: "11",
     color: rgb("#ef426f"),
     optional: true,
 
@@ -545,7 +545,7 @@
     pin(y: -4., d: SW),
   ),
   line(
-    number: "12",
+    id: "12",
     color: rgb("#c87a30"),
     optional: true,
 
@@ -587,7 +587,7 @@
     pin(x: -3.0, d: W),
   ),
   line(
-    number: "13",
+    id: "13",
     color: rgb("#007654"),
     optional: true,
 
@@ -622,7 +622,7 @@
     pin(dx: -0.8, d: SW),
   ),
   line(
-    number: "16",
+    id: "16",
     color: rgb("#ef7f1b"),
     optional: true,
 
@@ -653,7 +653,7 @@
     pin(x: -12.5, d: W),
   ),
   line(
-    number: "18",
+    id: "18",
     color: rgb("#ee7852"),
     optional: true,
 
@@ -695,7 +695,7 @@
     pin(x: 1.0, d: E),
   ),
   line(
-    number: "S1",
+    id: "S1",
     color: rgb("#4bbbb4"),
     optional: true,
 
@@ -715,7 +715,7 @@
     pin(dx: 3., d: E),
   ),
   line(
-    number: "S2",
+    id: "S2",
     color: rgb("#ab2328"),
     optional: true,
 
@@ -749,7 +749,7 @@
     pin(dy: -6., d: S),
   ),
   line(
-    number: "S3",
+    id: "S3",
     color: rgb("#b06c96"),
     optional: true,
 
@@ -780,7 +780,7 @@
     pin(dx: -3.25, d: SW),
   ),
   line(
-    number: "S3E",
+    id: "S3E",
     color: rgb("#b06c96"),
     optional: true,
 
@@ -818,7 +818,7 @@
     pin(dy: -0.7, d: SW),
   ),
   line(
-    number: "S4",
+    id: "S4",
     color: rgb("#ff661f"),
     optional: true,
 
@@ -852,7 +852,7 @@
     pin(dy: -0.5, d: SE),
   ),
   line(
-    number: "S5",
+    id: "S5",
     color: rgb("#f5df4d"),
     optional: true,
 
@@ -888,7 +888,7 @@
     pin(dy: 3., d: N),
   ),
   line(
-    number: "S6",
+    id: "S6",
     color: rgb("#c98bdb"),
     optional: true,
 
@@ -929,7 +929,7 @@
     pin(dy: -6., d: S),
   ),
   line(
-    number: "S7",
+    id: "S7",
     color: rgb("#e89cae"),
     optional: true,
 
@@ -948,7 +948,7 @@
     pin(dy: -2.5, d: S),
   ),
   line(
-    number: "S8",
+    id: "S8",
     color: rgb("#ea7600"),
     optional: true,
 
@@ -978,7 +978,7 @@
     pin(dx: 6., d: NE),
   ),
   line(
-    number: "S9",
+    id: "S9",
     color: rgb("#f1b434"),
     optional: true,
 
@@ -995,7 +995,7 @@
     pin(y: -25., d: S),
   ),
   line(
-    number: "2-9",
+    id: "2-9",
     color: rgb("#ffc65f"),
     optional: true,
     pin(x: -4.5 - 0.1, y: -2),
@@ -1231,7 +1231,7 @@
       logo-pos = vec.add(logo-pos, logo-offset)
     }
     let payload = (
-      body: box(inset: 1em, line-logo(line.number, line.color)),
+      body: box(inset: 1em, line-logo(line.id, line.color)),
       pos: logo-pos,
       anchor: metadata.logo-anchor,
     )
@@ -1241,7 +1241,7 @@
 
 // Only well-displayed in full map
 #let title-body = {
-  set text(font: "Microsoft YaHei")
+  set text(font: "Microsoft YaHei", size: 0.8em)
   set align(center)
 
   text(size: 12em, weight: "bold")[南京地铁运营线路图]
@@ -1250,7 +1250,7 @@
   v(-6em)
   text(size: 6em)[（实际走向拓扑图）]
 }
-#let title = (pos: (6, 20), body: title-body)
+#let title = (pos: (9, 20), body: title-body)
 
 #let legend-body = {
   let logo = image.decode(
@@ -1336,13 +1336,13 @@
       row-gutter: 0.3em,
       align: center + horizon,
       ..for line in nj-radish.lines.values() {
-        if line.number.len() > 2 or line.disabled { continue }
+        if line.id.len() > 2 or line.disabled { continue }
         (
           {
             std.line(start: (0%, 0em), end: (100%, 0em), stroke: (paint: line.color, thickness: 0.4em, cap: "round"))
             place(center + horizon, circle(radius: 0.15em, fill: white, stroke: none))
           },
-          text(0.35em, line-logo(line.number, line.color)),
+          text(0.35em, line-logo(line.id, line.color)),
           text(0.75em, black)[号线],
         )
       }
@@ -1355,7 +1355,7 @@
 
   v(1em)
 
-  context {
+  {
     import "../src/components/std.typ" as std-comp
 
     set text(0.75em, black)
@@ -1375,7 +1375,7 @@
   nj-radish,
   backend: "std",
   unit-length: 2.0cm,
-  // grid: none,
+  grid: none,
   foreground: (title, legend),
   background-color: land-fill,
   background: (changjiang, baguazhou, jiangxinzhou, qianzhou, xuanwuhu, shijiuhu, qinhuaihe, zijinshan),

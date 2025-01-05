@@ -27,7 +27,7 @@
         if station.id not in station-collection {
           station-collection.insert(station.id, ())
         }
-        station-collection.at(station.id).push(line.number)
+        station-collection.at(station.id).push(line.id)
       }
     }
   }
@@ -51,7 +51,7 @@
         let seg = line.segments.at(sta.segment)
         for line-id in metro.transfers.at(sta.id) {
           let line2 = metro.lines.at(line-id)
-          if line2.number != line.number {
+          if line2.id != line.id {
             let sta2 = line2.stations.at(line2.station-indexer.at(sta.id))
             let seg2 = line2.segments.at(sta2.segment)
           }
@@ -105,7 +105,7 @@
       }
     }
 
-    ((line.number, line),)
+    ((line.id, line),)
   }
   lines.to-dict()
 }
@@ -113,7 +113,7 @@
 #let metro(lines, features: (:), default-features: ()) = {
   let transfers = _resolve-transfers(lines)
   let mtr = (
-    lines: lines.map(line => (line.number, line)).to-dict(),
+    lines: lines.map(line => (line.id, line)).to-dict(),
     transfers: transfers,
     features: features,
     default-features: default-features,

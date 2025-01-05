@@ -8,7 +8,6 @@
   dx: auto,
   dy: auto,
   d: auto,
-  pin: none,
   end: false,
   layer: auto,
   cfg: auto,
@@ -21,7 +20,6 @@
     dx: dx,
     dy: dy,
     d: d,
-    pin: pin,
     end: end,
     layer: layer,
     cfg: cfg,
@@ -193,7 +191,7 @@
 }
 
 #let line(
-  number: "1",
+  id: "1",
   color: blue,
   index: auto,
   optional: false,
@@ -201,10 +199,10 @@
   default-features: (),
   ..points,
 ) = {
-  let (stations, sections, segments) = _extract-stations(points.pos(), number)
+  let (stations, sections, segments) = _extract-stations(points.pos(), id)
   let station-indexer = stations.enumerate().map(((i, sta)) => (sta.id, i)).to-dict()
   (
-    number: number,
+    id: id,
     color: color,
     index: index,
     sections: sections,
@@ -214,5 +212,6 @@
     optional: optional,
     features: features,
     default-features: default-features,
+    metadata: points.named(),
   )
 }

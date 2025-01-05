@@ -13,7 +13,7 @@
         if station.id not in station-collection {
           station-collection.insert(station.id, ())
         }
-        station-collection.at(station.id).push(line.number)
+        station-collection.at(station.id).push(line.id)
       }
     }
   }
@@ -40,7 +40,7 @@
       }
     }
 
-    ((line.number, line),)
+    ((line.id, line),)
   }
   lines.to-dict()
 }
@@ -76,7 +76,7 @@
         )
     )
 
-    let line-id = "L:" + line.number
+    let line-id = "L:" + line.id
 
     let line-disabled = not enable-all and line.optional and not enabled-features.contains(line-id)
     line.disabled = line-disabled
@@ -105,8 +105,8 @@
         not enable-all
           and (
             line.segments.at(sta.segment).disabled
-              or sta.cfg != none and not enabled-features.contains(sta.cfg)
-              or sta.cfg-not != none and enabled-features.contains(sta.cfg-not)
+              or "cfg" in sta and not enabled-features.contains(sta.cfg)
+              or "cfg-not" in sta and enabled-features.contains(sta.cfg-not)
           )
       )
     }
