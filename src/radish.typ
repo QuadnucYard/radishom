@@ -104,7 +104,7 @@
       line.stations.at(j).disabled = (
         not enable-all
           and (
-            get-segment-of-station(line, sta).disabled
+            line.segments.at(sta.segment).disabled
               or sta.cfg != none and not enabled-features.contains(sta.cfg)
               or sta.cfg-not != none and enabled-features.contains(sta.cfg-not)
           )

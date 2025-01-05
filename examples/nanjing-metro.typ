@@ -108,7 +108,7 @@
     station([羊山公园], [YANGSHANGONGYUAN], x: 14.0),
     pin-round(y: 7., d: NE),
     station([南大仙林校区], [NJU XIANLIN CAMPUS], x: 15.5),
-    station([经天路], [JINGTIANLU], x: 17., anchor: N, logo-anchor: NW),
+    station([经天路], [JINGTIANLU], x: 17., anchor: N, logo-anchor: S),
     pin(x: 17., d: E, cfg: "L2-EE"),
     pin-round(x: 18.4, d: E),
     station([仙林湖], [XIANLINHU], anchor: E),
@@ -216,7 +216,7 @@
     station([西岗桦墅], [XIGANGHUASHU], dy: 0.75),
     pin-round(y: 7.0, d: N),
     pin-round(dx: -0.4, d: NW),
-    station([仙林湖], [XIANLINHU], r: 1.0, logo-anchor: W),
+    station([仙林湖], [XIANLINHU], r: 1.0, logo-anchor: SW),
     pin(y: 8., d: N, cfg: "L4-4"),
     pin-round(y: 8.5, d: N),
     pin-round(x: 18.25, d: NW),
@@ -882,9 +882,9 @@
     station([仪征开发区], [YIZHENGKAIFAQU], dx: 2.5),
     station([朴席], [PUXI], dx: 4.),
     pin-round(dx: 4.5, d: E),
-    station([扬州汊河], [CHAHE]),
-    station([站南路], [ZHANNANLU]),
-    station([扬州西站], [YANGZHOU WEST RAILWAY STATION], logo-anchor: S),
+    station([扬州汊河], [CHAHE], anchor: E),
+    station([站南路], [ZHANNANLU], anchor: E),
+    station([扬州西站], [YANGZHOU WEST RAILWAY STATION], anchor: E, logo-anchor: S),
     pin(dy: 3., d: N),
   ),
   line(
@@ -1031,7 +1031,7 @@
     "progress": ("L:6", "L:9", "L:11"),
     "futures": (),
   ),
-  default-features: ("phase-1" /* "phase-2" */,),
+  default-features: ("phase-1", "phase-2"),
 )
 #let nj-radish = radish(
   nj-metro,
@@ -1142,6 +1142,8 @@
 #let shijiuhu = polygon(
   fill: water-fill,
   stroke: water-stroke,
+  label: bg-label([石臼湖], [SHIJIU LAKE]),
+  label-pos: (0.1, -23),
   (2.0, -22.25), // top-right
   (-1.5, -22.25),
   (-1.5, -23.75),
@@ -1211,7 +1213,6 @@
 
 #let line-logo(num, color, text-color: white) = {
   set text(size: if "-" in num { 2.5em } else { 3em })
-  show: box.with(inset: 0.3em)
   show: box.with(width: 0.5em * num.len(), height: 1.0em, fill: color)
   set align(center + horizon)
   show: box.with(width: 1em * num.len())
@@ -1230,7 +1231,7 @@
       logo-pos = vec.add(logo-pos, logo-offset)
     }
     let payload = (
-      body: line-logo(line.number, line.color),
+      body: box(inset: 1em, line-logo(line.number, line.color)),
       pos: logo-pos,
       anchor: metadata.logo-anchor,
     )
@@ -1238,12 +1239,158 @@
   }
 }
 
+// Only well-displayed in full map
+#let title-body = {
+  set text(font: "Microsoft YaHei")
+  set align(center)
+
+  text(size: 12em, weight: "bold")[南京地铁运营线路图]
+  v(-12em)
+  text(size: 8em)[Nanjing Metro System Map]
+  v(-6em)
+  text(size: 6em)[（实际走向拓扑图）]
+}
+#let title = (pos: (6, 20), body: title-body)
+
+#let legend-body = {
+  let logo = image.decode(
+    `<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1736037704585" class="icon" viewBox="0 0 1053 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4288" xmlns:xlink="http://www.w3.org/1999/xlink" width="205.6640625" height="200"><path d="M526.55119 0.092c-125.956 0-228.052 102.09-228.052 228.027-119.774-38.914-248.353 26.709-287.267 146.483-38.92 119.804 26.551 248.353 146.326 287.282-74.025 101.884-51.42 244.48 50.47 318.509 101.884 74.024 244.48 51.42 318.508-50.47 74.024 101.884 216.772 124.494 318.661 50.47 101.885-74.024 124.342-216.615 50.318-318.51 119.774-38.918 185.397-167.497 146.483-287.271-38.93-119.833-167.626-185.457-287.415-146.542C754.58319 102.134 652.51119 0.042 526.52119 0.042z" fill="#DE0010" p-id="4289"></path><path d="M475.60419 180.887v90.162c-152.296 24.406-268.65 156.385-268.65 315.58 0 105.104 50.667 198.366 128.943 256.651l60.933-82.012c-53.294-39.642-87.7-103.1-87.7-174.639 0-102.598 70.962-188.616 166.479-211.57v399.748H577.62119V375.06c95.516 23.003 166.637 109.025 166.637 211.57 0 71.543-34.52 134.996-87.859 174.638l60.81 82.08c78.32-58.28 129.096-151.542 129.096-256.65 0-159.146-116.403-291.115-268.65-315.58V180.97H475.61519z" fill="#FFFFFF" p-id="4290"></path></svg>`.text,
+    format: "svg",
+  )
+
+  let primary-color = rgb("112653")
+  set text(font: "Microsoft YaHei", fill: primary-color)
+
+  let header(body) = {
+    block(height: 1.8em)[
+      #std.polygon(
+        fill: primary-color,
+        (0%, 0%),
+        (0%, 100%),
+        (100% - 0.5em, 100%),
+        (100%, 100% - 0.5em),
+        (100%, 0%),
+      )
+      #place(center + horizon)[
+        #text(0.8em, white, body)
+      ]
+    ]
+  }
+
+  show: block.with(width: 12em)
+  set block(spacing: 0em)
+  set align(center)
+
+  // header
+  block(width: 100%, height: 4.5em, fill: primary-color)
+
+  show: block.with(
+    width: 100%,
+    fill: rgb("#f2fafd"),
+    inset: (top: 0.5em, bottom: 2em, x: 2em),
+  )
+
+  v(-2.5em)
+
+  scale(25%, reflow: true, logo)
+
+  v(0.6em)
+
+  [
+    #text(size: 1.2em)[南京地铁]
+    #v(-1.1em)
+    #text(size: 0.55em)[NANJING METRO]
+  ]
+
+  v(1.5em)
+
+  [
+    #circle(radius: 1.5em, stroke: primary-color + 1.5pt)[
+      #set align(horizon)
+      #text(1.2em)[Map]
+    ]
+    #v(0.3em)
+    #stack(
+      dir: ltr,
+      rotate(90deg, reflow: true)[
+        #text(0.75em)[System Map]
+      ],
+      h(0.5em),
+      block(width: 1em)[
+        #set par(leading: 0.25em)
+        #text(1.5em)[运营线路图]
+      ],
+    )
+  ]
+
+  v(2em)
+
+  header[地铁线路号]
+
+  v(1em)
+
+  block(inset: (x: 0.5em))[
+    #grid(
+      columns: 3,
+      column-gutter: (1.5em, 0.2em),
+      row-gutter: 0.3em,
+      align: center + horizon,
+      ..for line in nj-radish.lines.values() {
+        if line.number.len() > 2 or line.disabled { continue }
+        (
+          {
+            std.line(start: (0%, 0em), end: (100%, 0em), stroke: (paint: line.color, thickness: 0.4em, cap: "round"))
+            place(center + horizon, circle(radius: 0.15em, fill: white, stroke: none))
+          },
+          text(0.35em, line-logo(line.number, line.color)),
+          text(0.75em, black)[号线],
+        )
+      }
+    )
+  ]
+
+  v(2em)
+
+  header[图#h(3em)标]
+
+  v(1em)
+
+  context {
+    import "../src/components/std.typ" as std-comp
+
+    set text(0.75em, black)
+    grid(
+      columns: 2,
+      column-gutter: 2em,
+      row-gutter: 0.5em,
+      align: (horizon + center, horizon + left),
+      scale(80%, reflow: true, std-comp.circle-marker), [换乘枢纽],
+      std-comp.capsule-marker, [换乘站],
+    )
+  }
+}
+#let legend = (pos: (25, -25), anchor: SW, body: scale(200%, reflow: true, legend-body))
+
 #radishom(
   nj-radish,
   backend: "std",
   unit-length: 2.0cm,
   // grid: none,
+  foreground: (title, legend),
   background-color: land-fill,
   background: (changjiang, baguazhou, jiangxinzhou, qianzhou, xuanwuhu, shijiuhu, qinhuaihe, zijinshan),
   station-plugins: (draw-line-logo,),
 )
+
+#place(bottom + right)[
+  #set text(font: "Microsoft YaHei")
+  #show: block.with(inset: 1em)
+  #set par(spacing: 0.5em)
+  #text(gray)[
+    本图线路使用 Typst #sys.version 制作
+
+    仅供学习交流，未经允许不得使用
+
+    https://github.com/QuadnucYard/radishom
+  ]
+]
