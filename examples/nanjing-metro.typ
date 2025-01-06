@@ -704,7 +704,7 @@
     pin-round(dx: -1.0, d: W),
     pin-round(x: -0.5, d: SW),
     station([翠屏山], [CUIPINGSHAN], y: -11., anchor: E),
-    station([河海大学·佛城西路], [HHU/FOCHENGXILU], y: -14.0),
+    station([河海大学·佛城西路], [HHU/FOCHENGXILU], y: -14.0, anchor: E),
     station([吉印大道], [JIYINDADAO]),
     station([正方中路], [ZHENGFANGZHONGLU]),
     station([翔宇路北], [XIANGYULUBEI]),
@@ -823,7 +823,7 @@
     optional: true,
 
     pin(x: -12. + 0.1, y: 12.),
-    station([南京北站], [NANJING NORTH RAILWAY STATION]),
+    station([南京北站], [NANJING NORTH RAILWAY STATION], anchor: E),
     pin-round(dy: 1.5, d: N),
     station([北斗产业园], [BEIDOUCHANYEYUAN]),
     pin-round(dx: -1., d: NW),

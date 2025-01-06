@@ -104,13 +104,13 @@
 
       // extract transferred lines
       let tr-lines = if has-transfer {
-        for line-id in metro.transfers.at(sta.id) {
+        for line-id in transfers {
           let line = metro.lines.at(line-id)
           ((id: line.id, color: line.color, index: line.index, segments: line.segments),)
         }
       }
       let tr-stations = if has-transfer {
-        for line-id in metro.transfers.at(sta.id) {
+        for line-id in transfers {
           let line = metro.lines.at(line-id)
           (line.stations.at(line.station-indexer.at(sta.id)),)
         }
