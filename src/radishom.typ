@@ -66,15 +66,21 @@
       disabled: line.disabled,
     ) // partial line used as arg
 
-    if line-stroker != none {
-      let line-stroke = line-stroker(line-par)
-      for sec in line.sections {
-        if sec.disabled {
-          continue
-        }
+    let line-stroke = if "stroke" in line {
+      line.stroke
+    } else if line-stroker != none {
+      line-stroker(line-par)
+    }
+    for sec in line.sections {
+      if sec.disabled {
+        continue
+      }
+      let line-stroke = if sec.stroke != auto { sec.stroke } else { line-stroke }
+      if line-stroke != none {
         task.lines.push((points: sec.points, stroke: line-stroke, layer: sec.layer))
       }
     }
+
 
     // draw stations
     for (j, sta) in line.stations.enumerate() {

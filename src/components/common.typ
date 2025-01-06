@@ -1,10 +1,13 @@
 
-#let line-stroke(line, thickness: 6pt) = stroke(
-  paint: line.color,
-  thickness: thickness,
-  cap: "round",
-  join: "round",
-)
+#let line-stroke(line, thickness: 6pt) = {
+  let paint = if line.disabled { gray } else { line.color }
+  stroke(
+    paint: paint,
+    thickness: thickness,
+    cap: "round",
+    join: "round",
+  )
+}
 
 #let label-renderer(station) = {
   show: block.with(inset: (x: 0.5em, y: 0.5em))

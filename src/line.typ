@@ -9,9 +9,10 @@
   dy: auto,
   d: auto,
   end: false,
-  layer: auto,
   cfg: auto,
   cfg-not: auto,
+  layer: auto,
+  stroke: auto,
   corner-radius: none,
 ) = {
   (
@@ -21,9 +22,10 @@
     dy: dy,
     d: d,
     end: end,
-    layer: layer,
     cfg: cfg,
     cfg-not: cfg-not,
+    layer: layer,
+    stroke: stroke,
     corner-radius: corner-radius,
   )
 }
@@ -53,7 +55,7 @@
       }
       last-pos.x + dx
     } else {
-      panic()
+      panic([#end-pos #last-pos #dir])
     }
   }
   if end-pos.y == auto {
@@ -90,9 +92,12 @@
   assert(points.len() >= 2, message: "The metro line must have at least two points!")
 
   let last-pin = points.at(0) // resolved point
-  let cur-cfg = if last-pin.cfg == auto { none } else { last-pin.cfg }
-  let cur-cfg-not = if last-pin.cfg-not == auto { none } else { last-pin.cfg-not }
-  let cur-layer = if last-pin.layer == auto { 0 } else { last-pin.layer }
+  let cur-attrs = (
+    cfg: if last-pin.cfg == auto { none } else { last-pin.cfg },
+    cfg-not: if last-pin.cfg-not == auto { none } else { last-pin.cfg-not },
+    layer: if last-pin.layer == auto { 0 } else { last-pin.layer },
+    stroke: last-pin.stroke,
+  )
 
   let sections = ()
   let section-points = ((last-pin.x, last-pin.y),)
@@ -118,9 +123,8 @@
       end: (tx, ty),
       angle: angle,
       range: (start: stations.len(), end: stations.len() + j - i),
-      layer: cur-layer,
-      cfg: cur-cfg,
-      cfg-not: cur-cfg-not,
+      cfg: cur-attrs.cfg,
+      cfg-not: cur-attrs.cfg-not,
     )
 
     // process stations on this segment
@@ -149,16 +153,12 @@
     segments.push(seg)
 
     // update current pin and cfg
+    let prev-attrs = cur-attrs
     last-pin = end-pos
-    if last-pin.layer != auto {
-      cur-cfg-not = last-pin.layer
-    }
-    if last-pin.cfg != auto {
-      cur-cfg = last-pin.cfg
-    }
-    if last-pin.cfg-not != auto {
-      cur-cfg-not = last-pin.cfg-not
-    }
+    if last-pin.cfg != auto { cur-attrs.cfg = last-pin.cfg }
+    if last-pin.cfg-not != auto { cur-attrs.cfg-not = last-pin.cfg-not }
+    if last-pin.layer != auto { cur-attrs.cfg-not = last-pin.layer }
+    if last-pin.stroke != auto { cur-attrs.stroke = last-pin.stroke }
 
     // add section point
     section-points.push(if end-pos.corner-radius == none {
@@ -166,15 +166,15 @@
     } else {
       (seg.end, end-pos.corner-radius)
     })
-    if seg.cfg != cur-cfg or seg.cfg-not != cur-cfg-not or seg.layer != cur-layer {
-      sections.push((points: section-points, layer: seg.layer, cfg: seg.cfg, cfg-not: seg.cfg-not))
+    if cur-attrs != prev-attrs {
+      sections.push((points: section-points, ..prev-attrs))
       section-points = (seg.end,)
     }
 
     i = j + 1
   }
   if section-points.len() > 0 {
-    sections.push((points: section-points, layer: cur-layer, cfg: cur-cfg, cfg-not: cur-cfg-not))
+    sections.push((points: section-points, ..cur-attrs))
   }
 
   // Set positions for terminal stations
@@ -197,11 +197,12 @@
   optional: false,
   features: (:),
   default-features: (),
+  stroke: auto,
   ..points,
 ) = {
   let (stations, sections, segments) = _extract-stations(points.pos(), id)
   let station-indexer = stations.enumerate().map(((i, sta)) => (sta.id, i)).to-dict()
-  (
+  let data = (
     id: id,
     color: color,
     index: index,
@@ -214,4 +215,6 @@
     default-features: default-features,
     metadata: points.named(),
   )
+  if stroke != auto { data.stroke = stroke }
+  data
 }
