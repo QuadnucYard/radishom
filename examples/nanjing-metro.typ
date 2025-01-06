@@ -1038,6 +1038,7 @@
   default-features: true,
   // features: ("phase-1", "built", "L2-EE", "no-jqmdj", "L5-S", "L5-N", "L7-N", "L7-S"),
   enable-all: true,
+  // consider-disabled: true,
 )
 
 #let land-fill = rgb("#f6f6f6")
@@ -1380,6 +1381,7 @@
   background-color: land-fill,
   background: (changjiang, baguazhou, jiangxinzhou, qianzhou, xuanwuhu, shijiuhu, qinhuaihe, zijinshan),
   station-plugins: (draw-line-logo,),
+  // draw-disabled: true
 )
 
 #place(bottom + right)[

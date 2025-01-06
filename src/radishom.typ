@@ -15,6 +15,7 @@
   label-renderer: auto,
   line-plugins: (),
   station-plugins: (),
+  draw-disabled: false,
 ) = {
   let (backend, components) = if backend == "cetz" {
     import "backends/cetz.typ" as cetz-be
@@ -54,7 +55,7 @@
   let (min-x, min-y, max-x, max-y) = (0, 0, 0, 0)
 
   for line in metro.lines.values() {
-    if line.disabled {
+    if line.disabled and not draw-disabled {
       continue
     }
 
@@ -72,7 +73,7 @@
       line-stroker(line-par)
     }
     for sec in line.sections {
-      if sec.disabled {
+      if sec.disabled and not draw-disabled {
         continue
       }
       let line-stroke = if sec.stroke != auto { sec.stroke } else { line-stroke }
@@ -84,11 +85,15 @@
 
     // draw stations
     for (j, sta) in line.stations.enumerate() {
-      if sta.disabled {
+      if sta.disabled and not draw-disabled {
         continue
       }
 
-      let transfers = metro.enabled-transfers.at(sta.id, default: none)
+      let transfers = if draw-disabled {
+        metro.transfers.at(sta.id, default: none)
+      } else {
+        metro.enabled-transfers.at(sta.id, default: none)
+      }
       let has-transfer = transfers != none
       let is-not-first-transfer = has-transfer and line.id != transfers.at(0)
 

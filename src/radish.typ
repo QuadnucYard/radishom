@@ -21,16 +21,17 @@
   return station-collection
 }
 
-#let _resolve-pending-station-attrs(metro) = {
+#let _resolve-pending-station-attrs(metro, consider-disabled: false) = {
+  let transfers = if consider-disabled { metro.transfers } else { metro.enabled-transfers }
   let lines = for (i, line) in metro.lines {
     for (k, sta) in line.stations.enumerate() {
       // set station anchor
       if sta.anchor == auto {
-        line.stations.at(k).anchor = if sta.transfer == none or sta.id not in metro.enabled-transfers {
+        line.stations.at(k).anchor = if sta.transfer == none or sta.id not in transfers {
           let seg = line.segments.at(sta.segment)
           get-best-anchor(seg)
         } else {
-          let tr-ctx = for line-id in metro.enabled-transfers.at(sta.id) {
+          let tr-ctx = for line-id in transfers.at(sta.id) {
             let line2 = metro.lines.at(line-id)
             let sta2 = line2.stations.at(line2.station-indexer.at(sta.id))
             ((pos: sta2.pos, seg-idx: sta2.segment, segments: line2.segments),)
@@ -60,6 +61,7 @@
   default-features: true,
   all-features: false,
   enable-all: false,
+  consider-disabled: false,
 ) = {
   let global-enabled-features = resolve-enabled-features(
     metro.features,
@@ -112,7 +114,10 @@
     }
 
     // find terminuses
-    {
+    if consider-disabled {
+      line.stations.first().terminal = true
+      line.stations.last().terminal = true
+    } else {
       let j = 0
       while j < line.stations.len() {
         while j < line.stations.len() and line.stations.at(j).disabled {
@@ -133,7 +138,7 @@
     metro.lines.at(i) = line
   }
   metro.enabled-transfers = _resolve-enabled-transfers(metro.lines)
-  metro.lines = _resolve-pending-station-attrs(metro)
+  metro.lines = _resolve-pending-station-attrs(metro, consider-disabled: consider-disabled)
 
   metro
 }
