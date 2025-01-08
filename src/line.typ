@@ -104,31 +104,32 @@
   let segments = ()
   let stations = ()
 
-  let i = 1 // index of control point
-  while i < points.len() {
-    let j = i
-    while "id" in points.at(j) {
-      j += 1 // skip stations
+  let first = 1 // index of control point
+  while first < points.len() {
+    let last = first
+    while "id" in points.at(last) {
+      last += 1 // skip stations
     }
-    let cur-point = points.at(j) // a pin
-
-    let end-pos = _resolve-moved(cur-point, last-pin, cur-point.d)
+    let tar-pos = {
+      let cur-point = points.at(last) // a pin
+      _resolve-moved(cur-point, last-pin, cur-point.d)
+    }
 
     let (sx, sy) = (last-pin.x, last-pin.y)
-    let (tx, ty) = (end-pos.x, end-pos.y)
+    let (tx, ty) = (tar-pos.x, tar-pos.y)
     let angle = calc.atan2(tx - sx, ty - sy)
 
     let seg = (
       start: (sx, sy),
       end: (tx, ty),
       angle: angle,
-      range: (start: stations.len(), end: stations.len() + j - i),
+      range: (start: stations.len(), end: stations.len() + last - first),
       cfg: cur-attrs.cfg,
       cfg-not: cur-attrs.cfg-not,
     )
 
     // process stations on this segment
-    for sta in points.slice(i, j) {
+    for sta in points.slice(first, last) {
       sta.segment = segments.len()
 
       let (x, y, r, dx, dy) = sta.remove("raw-pos")
@@ -150,28 +151,34 @@
       sta.pos = if x == auto or y == auto { auto } else { (x, y) } // mark pos auto, handle it later
       stations.push(sta)
     }
+    if tar-pos.end and stations.last().pos == auto {
+      stations.last().pos = seg.end
+    }
     segments.push(seg)
 
     // update current pin and cfg
     let prev-attrs = cur-attrs
-    last-pin = end-pos
-    if last-pin.cfg != auto { cur-attrs.cfg = last-pin.cfg }
-    if last-pin.cfg-not != auto { cur-attrs.cfg-not = last-pin.cfg-not }
-    if last-pin.layer != auto { cur-attrs.cfg-not = last-pin.layer }
-    if last-pin.stroke != auto { cur-attrs.stroke = last-pin.stroke }
+    if tar-pos.cfg != auto { cur-attrs.cfg = tar-pos.cfg }
+    if tar-pos.cfg-not != auto { cur-attrs.cfg-not = tar-pos.cfg-not }
+    if tar-pos.layer != auto { cur-attrs.cfg-not = tar-pos.layer }
+    if tar-pos.stroke != auto { cur-attrs.stroke = tar-pos.stroke }
 
     // add section point
-    section-points.push(if end-pos.corner-radius == none {
-      seg.end
-    } else {
-      (seg.end, end-pos.corner-radius)
-    })
-    if cur-attrs != prev-attrs {
+    if not last-pin.end {
+      section-points.push(if tar-pos.corner-radius == none {
+        seg.end
+      } else {
+        (seg.end, tar-pos.corner-radius)
+      })
+    }
+
+    if last-pin.end or cur-attrs != prev-attrs {
       sections.push((points: section-points, ..prev-attrs))
       section-points = (seg.end,)
     }
 
-    i = j + 1
+    last-pin = tar-pos
+    first = last + 1
   }
   if section-points.len() > 0 {
     sections.push((points: section-points, ..cur-attrs))

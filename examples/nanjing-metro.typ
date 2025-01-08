@@ -777,12 +777,7 @@
     station([桥林新城], [QIAOLINXINCHENG]),
     station([林山], [LINSHAN]),
     station([高家冲], [GAOJIACHONG], logo-anchor: SE),
-    pin(dx: -3.25, d: SW),
-  ),
-  line(
-    id: "S3E",
-    color: rgb("#b06c96"),
-    optional: true,
+    pin(dx: -3.25, d: SW, end: true),
 
     pin(x: 1.0, y: -8.0),
     station([南京南站], [NANJING SOUTH RAILWAY STATION]),
