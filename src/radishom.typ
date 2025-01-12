@@ -65,6 +65,7 @@
       index: line.index,
       segments: line.segments,
       disabled: line.disabled,
+      metadata: line.metadata,
     ) // partial line used as arg
 
     let line-stroke = if "stroke" in line {
@@ -140,7 +141,10 @@
       }
 
       if not hidden and label-renderer != none {
-        let label = label-renderer(sta)
+        let label = {
+          set align(if "west" in sta.anchor { left } else if "east" in sta.anchor { right } else { center })
+          label-renderer(sta)
+        }
         let label-pos = if "label-pos" in sta {
           sta.label-pos
         } else if has-transfer {

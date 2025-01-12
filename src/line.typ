@@ -199,7 +199,7 @@
 
 #let line(
   id: "1",
-  color: blue,
+  color: gray,
   index: auto,
   optional: false,
   features: (:),

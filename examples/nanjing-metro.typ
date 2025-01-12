@@ -1255,7 +1255,7 @@
   )
 
   let primary-color = rgb("112653")
-  set text(font: "Microsoft YaHei", fill: primary-color)
+  set text(font: "Source Han Sans SC", fill: primary-color)
 
   let header(body) = {
     block(height: 1.8em)[
@@ -1367,6 +1367,18 @@
 }
 #let legend = (pos: (25, -25), anchor: SW, body: scale(200%, reflow: true, legend-body))
 
+#let label-renderer(station) = {
+  show: block.with(inset: (x: 0.5em, y: 0.5em))
+  set par(spacing: 0.2em)
+  set smartquote(enabled: false)
+
+  [
+    #text(font: "Source Han Sans SC", station.name)
+
+    #text(size: 0.45em, font: "Source Han Sans SC", station.metadata.at(0))
+  ]
+}
+
 #radishom(
   nj-radish,
   backend: "std",
@@ -1375,6 +1387,7 @@
   foreground: (title, legend),
   background-color: land-fill,
   background: (changjiang, baguazhou, jiangxinzhou, qianzhou, xuanwuhu, shijiuhu, qinhuaihe, zijinshan),
+  label-renderer: label-renderer,
   station-plugins: (draw-line-logo,),
   // draw-disabled: true
 )

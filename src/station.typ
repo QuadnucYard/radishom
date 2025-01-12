@@ -3,7 +3,6 @@
 
 #let station(
   name,
-  subname,
   id: auto,
   x: auto,
   y: auto,
@@ -28,7 +27,6 @@
   let data = (
     id: id,
     name: name,
-    subname: subname,
     raw-pos: (x: x, y: y, dx: dx, dy: dy, r: r),
     anchor: anchor,
     transfer: transfer,
