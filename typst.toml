@@ -7,5 +7,5 @@ license = "MIT"
 description = "Draw elegant metro maps with ease"
 categories = ["visualization"]
 keywords = ["metro", "subway", "map"]
-repository = "https://github.com/QuadnucYard/radishom.typ"
+repository = "https://github.com/QuadnucYard/radishom"
 exclude = ["examples"]
