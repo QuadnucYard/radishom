@@ -1,5 +1,7 @@
 #import "core/vec.typ"
 #import "metro.typ": get-transfer-label-pos
+#import "backends/mod.typ" as backends
+#import "components/mod.typ" as components
 
 
 #let radishom(
@@ -18,13 +20,9 @@
   draw-disabled: false,
 ) = {
   let (backend, components) = if backend == "cetz" {
-    import "backends/cetz.typ" as cetz-be
-    import "components/cetz.typ" as cetz-comp
-    (cetz-be, dictionary(cetz-comp))
+    (backends.use("cetz"), dictionary(components.use("cetz")))
   } else if backend == "std" {
-    import "backends/std.typ" as std-be
-    import "components/std.typ" as std-comp
-    (std-be, dictionary(std-comp))
+    (backends.use("std"), dictionary(components.use("std")))
   } else {
     assert(
       line-stroker != auto and marker-renderer != auto and label-renderer != auto,
