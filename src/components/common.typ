@@ -1,5 +1,5 @@
 
-#let line-stroke(line, thickness: 6pt) = {
+#let line-stroke(line, sec, thickness: 6pt) = {
   let paint = if line.disabled { gray } else { line.color }
   stroke(
     paint: paint,

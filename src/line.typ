@@ -14,6 +14,7 @@
   layer: auto,
   stroke: auto,
   corner-radius: none,
+  ..metadata,
 ) = {
   (
     x: x,
@@ -27,6 +28,7 @@
     layer: layer,
     stroke: stroke,
     corner-radius: corner-radius,
+    metadata: metadata.named(),
   )
 }
 
@@ -97,6 +99,7 @@
     cfg-not: if last-pin.cfg-not == auto { none } else { last-pin.cfg-not },
     layer: if last-pin.layer == auto { 0 } else { last-pin.layer },
     stroke: last-pin.stroke,
+    metadata: last-pin.metadata,
   )
 
   let sections = ()
@@ -162,6 +165,7 @@
     if tar-pos.cfg-not != auto { cur-attrs.cfg-not = tar-pos.cfg-not }
     if tar-pos.layer != auto { cur-attrs.cfg-not = tar-pos.layer }
     if tar-pos.stroke != auto { cur-attrs.stroke = tar-pos.stroke }
+    cur-attrs.metadata += tar-pos.metadata
 
     // add section point
     if not last-pin.end {

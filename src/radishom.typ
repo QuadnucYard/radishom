@@ -68,19 +68,28 @@
 
     let line-stroke = if "stroke" in line {
       line.stroke
-    } else if line-stroker != none {
-      line-stroker(line-par)
     }
     for sec in line.sections {
       if sec.disabled and not draw-disabled {
         continue
       }
-      let line-stroke = if sec.stroke != auto { sec.stroke } else { line-stroke }
-      if line-stroke != none {
-        task.lines.push((points: sec.points, stroke: line-stroke, layer: sec.layer))
+      let sec-par = (
+        layer: sec.layer,
+        stroke: sec.stroke,
+        disabled: sec.disabled,
+        metadata: sec.metadata,
+      )
+      let stroke = if sec.stroke != auto {
+        sec.stroke
+      } else if line-stroker != none {
+        line-stroker(line-par, sec-par)
+      } else {
+        line-stroke
+      }
+      if stroke != none {
+        task.lines.push((points: sec.points, stroke: stroke, layer: sec.layer))
       }
     }
-
 
     // draw stations
     for (j, sta) in line.stations.enumerate() {
