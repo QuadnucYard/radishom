@@ -19,6 +19,24 @@
   return k
 }
 
+#let pick-once-elements(a) = {
+  a = a.sorted()
+  let res = ()
+  let len = a.len()
+  let i = 0
+  while i < len {
+    let j = i
+    while j < len and a.at(j) == a.at(i) {
+      j += 1
+    }
+    if j == i + 1 {
+      res.push(a.at(i))
+    }
+    i = j
+  }
+  return res
+}
+
 /// Get a suitable rotation of the transfer marker for the given station.
 #let get-preferred-angle(angles) = {
   let angles = for angle in angles {

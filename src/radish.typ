@@ -2,6 +2,7 @@
 
 #import "core/anchor.typ": get-best-anchor, get-best-anchor-tr
 #import "feature.typ": resolve-enabled-features
+#import "utils.typ": pick-once-elements
 
 
 #let _resolve-enabled-transfers(lines) = {
@@ -114,24 +115,38 @@
     }
 
     // find terminuses
-    if consider-disabled {
-      line.stations.first().terminal = true
-      line.stations.last().terminal = true
-    } else {
+    {
+      let candidate-terminuses = ()
       let j = 0
       while j < line.stations.len() {
-        while j < line.stations.len() and line.stations.at(j).disabled {
+        while j < line.stations.len() and (not consider-disabled and line.stations.at(j).disabled) {
           j += 1
         }
         if j >= line.stations.len() { break }
         let first-enabled = j
         let last-enabled = j
-        while j < line.stations.len() and not line.segments.at(line.stations.at(j).segment).disabled {
+        while (
+          j < line.stations.len()
+            and (
+              consider-disabled or not line.segments.at(line.stations.at(j).segment).disabled
+            )
+        ) {
           last-enabled = j
           j += 1
+          if "trunc" in line.stations.at(last-enabled) {
+            break
+          }
         }
-        line.stations.at(first-enabled).terminal = true
-        line.stations.at(last-enabled).terminal = true
+
+        candidate-terminuses.push(last-enabled)
+        if first-enabled != last-enabled and "branch" not in line.stations.at(first-enabled) {
+          candidate-terminuses.push(first-enabled)
+        }
+      }
+
+      // set stations counted once as terminuses
+      for idx in pick-once-elements(candidate-terminuses) {
+        line.stations.at(idx).terminal = true
       }
     }
 

@@ -154,8 +154,11 @@
       sta.pos = if x == auto or y == auto { auto } else { (x, y) } // mark pos auto, handle it later
       stations.push(sta)
     }
-    if tar-pos.end and stations.last().pos == auto {
-      stations.last().pos = seg.end
+    if tar-pos.end {
+      stations.last().trunc = true // mark section truncated here
+      if stations.last().pos == auto {
+        stations.last().pos = seg.end
+      }
     }
     segments.push(seg)
 

@@ -13,6 +13,7 @@
   anchor: auto,
   hidden: false,
   transfer: auto,
+  branch: none,
   marker-pos: auto,
   marker-offset: none,
   label-pos: auto,
@@ -34,6 +35,7 @@
   )
   if offset != none { data.offset = offset }
   if hidden != false { data.hidden = hidden }
+  if branch != none { data.branch = branch }
   if marker-pos != auto { data.marker-pos = marker-pos }
   if marker-offset != none { data.marker-offset = marker-offset }
   if label-pos != auto { data.label-pos = label-pos }
