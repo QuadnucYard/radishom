@@ -1,5 +1,5 @@
 #import "common.typ": *
-#import "../utils.typ": get-preferred-angle as _get-preferred-angle
+#import "../core/utils.typ": get-preferred-angle as _get-preferred-angle
 
 
 #let primary-color = rgb("#112653")

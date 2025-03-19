@@ -1,8 +1,8 @@
 /// Featuee-based metro instantiation.
 
-#import "core/anchor.typ": get-best-anchor, get-best-anchor-tr
-#import "feature.typ": resolve-enabled-features
-#import "utils.typ": pick-once-elements
+#import "../core/anchor.typ": get-best-anchor, get-best-anchor-tr
+#import "../core/feature.typ": resolve-enabled-features
+#import "../core/utils.typ": pick-once-elements
 
 
 #let _resolve-enabled-transfers(lines) = {

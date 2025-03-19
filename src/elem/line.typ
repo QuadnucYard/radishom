@@ -1,5 +1,5 @@
-#import "dir.typ": dirs
-#import "utils.typ": lerp
+#import "../core/dir.typ": dirs
+#import "../core/utils.typ": lerp
 
 
 #let pin(

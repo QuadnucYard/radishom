@@ -1,5 +1,5 @@
 #import "core/vec.typ"
-#import "metro.typ": get-transfer-label-pos
+#import "elem/metro.typ": get-transfer-label-pos
 #import "backends/mod.typ" as backends
 #import "components/mod.typ" as components
 

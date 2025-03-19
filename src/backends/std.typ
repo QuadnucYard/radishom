@@ -1,4 +1,4 @@
-#import "../dir.typ": dirs
+#import "../core/dir.typ": dirs
 
 
 #let _zero-pos = (0, 0)

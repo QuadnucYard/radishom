@@ -1,5 +1,5 @@
-#import "../dir.typ": dirs
-#import "../utils.typ": min-index
+#import "dir.typ": dirs
+#import "utils.typ": min-index
 
 
 #let _anchors = (dirs.W, dirs.SW, dirs.S, dirs.NW, dirs.E, dirs.NE, dirs.N, dirs.NW)

@@ -1,4 +1,4 @@
-#import "core/vec.typ"
+#import "../core/vec.typ"
 
 
 /// Get a suitable position of the label for the given station based on anchor.
