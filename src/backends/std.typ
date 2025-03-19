@@ -15,14 +15,12 @@
 
 #let _get-canvas(coords, u, fill: white) = {
   let ((x1, y1), (x2, y2)) = coords
-  body => {
-    block(
-      move(body, dx: -x1 * u, dy: y2 * u),
-      width: (x2 - x1) * u,
-      height: (y2 - y1) * u,
-      fill: fill,
-    )
-  }
+  body => block(
+    move(body, dx: -x1 * u, dy: y2 * u),
+    width: (x2 - x1) * u,
+    height: (y2 - y1) * u,
+    fill: fill,
+  )
 }
 
 /// Get the position on the canvas.
@@ -38,7 +36,7 @@
 
 #let _draw-grid(grid, u) = {
   let ((x1, y1), (x2, y2)) = grid.coords
-  let pat = pattern(size: (u, u))[
+  let pat = tiling(size: (u, u))[
     #rect(width: u, height: u, stroke: grid.stroke)
   ]
   _draw(rect(fill: pat, width: 100%, height: 100%), (x1, y2), u)
@@ -63,22 +61,22 @@
   let arc-y1 = y0 + (y1 - y0) * radius / d1
   let arc-x2 = x0 + (x2 - x0) * radius / d2 // arc point 2
   let arc-y2 = y0 + (y2 - y0) * radius / d2
-  let ct-x1 = (x0 - arc-x1) * 0.5
-  let ct-y1 = (y0 - arc-y1) * 0.5
-  let ct-x2 = (x0 - arc-x2) * 0.5
-  let ct-y2 = (y0 - arc-y2) * 0.5
+  let ct-x1 = (x0 + arc-x1) * 0.5
+  let ct-y1 = (y0 + arc-y1) * 0.5
+  let ct-x2 = (x0 + arc-x2) * 0.5
+  let ct-y2 = (y0 + arc-y2) * 0.5
   (
-    ((arc-x1 * u, arc-y1 * -u), (0pt, 0pt), (ct-x1 * u, ct-y1 * -u)),
-    ((arc-x2 * u, arc-y2 * -u), (ct-x2 * u, ct-y2 * -u), (0pt, 0pt)),
+    curve.line((arc-x1 * u, arc-y1 * -u)),
+    curve.cubic((ct-x1 * u, ct-y1 * -u), (ct-x2 * u, ct-y2 * -u), (arc-x2 * u, arc-y2 * -u)),
   )
 }
 
-#let _make-curved(points, u) = {
+#let _make-curve(points, u, ..args) = {
   let extract(pt) = {
     if type(pt.at(0)) == array { pt.at(0) } else { pt }
   }
 
-  for (i, pt) in points.enumerate() {
+  let curve-points = for (i, pt) in points.enumerate() {
     if type(pt.at(0)) == array {
       let (pt, radius) = pt
       let p1 = extract(points.at(i - 1))
@@ -86,24 +84,36 @@
       _round-corner(pt, p1, p2, radius, u)
     } else {
       let (x, y) = pt
-      ((x * u, y * -u),)
+      if i == 0 {
+        (curve.move((x * u, y * -u)),)
+      } else {
+        (curve.line((x * u, y * -u)),)
+      }
     }
   }
+  curve(..curve-points, ..args)
 }
 
 #let _draw-polygon(p, u) = {
   let radius = p.at("corner-radius", default: 0)
-  let vertices = if radius > 0 {
-    let vertices = p.vertices
+
+  let vertices = p.vertices
+  let points = if radius <= 0 {
+    // Simple polygon case
+    vertices.map(pt => _cpos(pt, u))
+  } else {
+    // Rounded corner case
+    let (x0, y0) = vertices.at(0)
     vertices.push(vertices.at(0))
     vertices.push(vertices.at(1))
-    for (p1, pt, p2) in vertices.windows(3) {
-      _round-corner(pt, p1, p2, radius, u)
-    }
-  } else {
-    p.vertices.map(pt => _cpos(pt, u))
+    (
+      curve.move((x0 * u, y0 * -u)),
+      ..for (p1, pt, p2) in vertices.windows(3) {
+        _round-corner(pt, p1, p2, radius, u)
+      },
+    )
   }
-  let shape = path(closed: true, fill: p.fill, stroke: p.stroke, ..vertices)
+  let shape = curve(..points, fill: p.fill, stroke: p.stroke)
   place(shape)
 }
 
@@ -124,8 +134,8 @@
   }
 
   for line in task.lines.sorted(key: l => l.layer) {
-    let points = _make-curved(line.points, unit-length)
-    place(path(..points, stroke: line.stroke))
+    let crv = _make-curve(line.points, unit-length, stroke: line.stroke)
+    place(crv)
   }
 
   for marker in task.markers {
