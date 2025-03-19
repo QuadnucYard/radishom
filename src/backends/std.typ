@@ -71,7 +71,7 @@
   )
 }
 
-#let _make-curve(points, u, ..args) = {
+#let _make-curve(points, u) = {
   let extract(pt) = {
     if type(pt.at(0)) == array { pt.at(0) } else { pt }
   }
@@ -91,7 +91,7 @@
       }
     }
   }
-  curve(..curve-points, ..args)
+  curve-points
 }
 
 #let _draw-polygon(p, u) = {
@@ -134,8 +134,14 @@
   }
 
   for line in task.lines.sorted(key: l => l.layer) {
-    let crv = _make-curve(line.points, unit-length, stroke: line.stroke)
-    place(crv)
+    let curve-points = _make-curve(line.points, unit-length)
+    if type(line.stroke) == array {
+      for line-stroke in line.stroke {
+        place(curve(..curve-points, stroke: line-stroke))
+      }
+    } else {
+      place(curve(..curve-points, stroke: line.stroke))
+    }
   }
 
   for marker in task.markers {
