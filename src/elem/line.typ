@@ -34,7 +34,13 @@
 
 #let _resolve-moved(end-pos, last-pos, dir) = {
   if end-pos.x == auto {
-    end-pos.x = if dir == dirs.E or dir == dirs.W {
+    end-pos.x = if dir == auto {
+      if end-pos.dx != auto {
+        last-pos.x + end-pos.dx
+      } else {
+        last-pos.x
+      }
+    } else if dir == dirs.E or dir == dirs.W {
       last-pos.x + end-pos.dx
     } else if dir == dirs.N or dir == dirs.S {
       last-pos.x
@@ -57,11 +63,17 @@
       }
       last-pos.x + dx
     } else {
-      panic([#end-pos #last-pos #dir])
+      last-pos.x
     }
   }
   if end-pos.y == auto {
-    end-pos.y = if dir == dirs.N or dir == dirs.S {
+    end-pos.y = if dir == auto {
+      if end-pos.dy != auto {
+        last-pos.y + end-pos.dy
+      } else {
+        last-pos.y
+      }
+    } else if dir == dirs.N or dir == dirs.S {
       last-pos.y + end-pos.dy
     } else if dir == dirs.E or dir == dirs.W {
       last-pos.y
@@ -84,7 +96,7 @@
       }
       last-pos.y + dy
     } else {
-      panic([#end-pos #last-pos #dir])
+      last-pos.y
     }
   }
   end-pos
