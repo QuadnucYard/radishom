@@ -1,10 +1,21 @@
-/// Featuee-based metro instantiation.
+/// Feature-based metro instantiation.
 
 #import "../core/anchor.typ": get-best-anchor, get-best-anchor-tr
 #import "../core/feature.typ": resolve-enabled-features
 #import "../core/utils.typ": pick-once-elements
 
 
+/// Analyzes line data to identify enabled transfer stations.
+///
+/// Takes a dictionary of line objects and processes them to find stations where
+/// transfers between different lines are possible. A station is considered a
+/// transfer point if it appears in multiple enabled lines and is not disabled.
+///
+/// Returns a mapping from station IDs to arrays of line IDs where transfers are possible.
+/// Only includes stations that connect to multiple lines.
+///
+/// - lines (dictionary): Dictionary mapping line IDs to line objects.
+/// -> dictionary
 #let _resolve-enabled-transfers(lines) = {
   let station-collection = (:) // station-id -> {line-number}
   for line in lines.values() {
@@ -22,6 +33,22 @@
   return station-collection
 }
 
+/// Resolves and updates pending station attributes in a metro system.
+/// Returns a dictionary of updated line objects.
+///
+/// This function processes all stations in the system and determines their optimal
+/// anchor points for labels based on line geometry and transfer connections.
+/// Anchor Point Determination:
+/// - For non-transfer stations:
+///   Uses the angle of the line segment at the station
+/// - For transfer stations:
+///   Considers geometry of all connected lines to find optimal label placement
+///   that avoids visual obstruction
+///
+/// - metro (metro): The metro system object containing lines and transfer information.
+/// - consider-disabled (bool): Whether to include disabled transfers in anchor computation
+///   If set to true, disabled lines will involve in the anchor computation.
+/// -> dictionary
 #let _resolve-pending-station-attrs(metro, consider-disabled: false) = {
   let transfers = if consider-disabled { metro.transfers } else { metro.enabled-transfers }
   let lines = for (i, line) in metro.lines {
@@ -30,7 +57,7 @@
       if sta.anchor == auto {
         line.stations.at(k).anchor = if sta.transfer == none or sta.id not in transfers {
           let seg = line.segments.at(sta.segment)
-          get-best-anchor(seg)
+          get-best-anchor(seg.angle)
         } else {
           let tr-ctx = for line-id in transfers.at(sta.id) {
             let line2 = metro.lines.at(line-id)
@@ -50,12 +77,12 @@
 /// Instantiate a metro system with given features.
 /// It will mark lines, sections, segments, and stations disabled or not.
 ///
-/// - metro ():
+/// - metro (metro): A metro object.
 /// - features (array): Array of enabled features.
 /// - default-features (bool): Whether to include default features.
 /// - all-features (bool): Whether to include all features. (unimplemented)
 /// - enable-all (bool): Whether to enable all elements.
-/// ->
+/// -> radish
 #let radish(
   metro,
   features: (),

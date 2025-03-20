@@ -4,8 +4,36 @@
 #import "components/mod.typ" as components
 
 
+/// Renders a metro map using the specified backend and configuration.
+///
+/// *Note:*
+///
+/// When using a custom backend, you need to provide `line-stroker`, `marker-renderer`,
+/// and `label-renderer` functions.
+///
+/// - radish (radish): A radish object.
+/// - backend (str, module, dictionary): The rendering backend to use. Can be `"std"` or custom.
+///
+/// - unit-length (length): The base unit length for the map.
+/// - grid (auto, none, array): Grid configuration. Can be custom coordinates in form of `((x1, y1), (x2, y2))`.
+/// - foreground (array): Collection of foreground elements.
+/// - background (array): Collection of background elements.
+/// - background-color (color): Background color of the map.
+/// - line-stroker (auto, function): Function to generate line strokes.
+///   Signature: `(line, section) -> stroke | stroke[]`.
+/// - marker-renderer (auto, function): Function to render station markers.
+///   Signature: `(line, station, tr-lines, tr-stations) -> content`.
+/// - label-renderer (auto, function): Function to render station labels.
+///   Signature: `(station) -> content`.
+/// - line-plugins (array): Collection of line rendering plugins.
+///   Signature: `(line-par) -> content | none`.
+/// - station-plugins (array): Collection of station rendering plugins.
+///   Signature: `(line-par, station) -> content | none`.
+/// - draw-disabled (bool): Whether to draw disabled lines and stations.
+///
+/// -> content
 #let radishom(
-  metro,
+  radish,
   backend: "std",
   unit-length: 1cm,
   grid: auto,
@@ -50,7 +78,7 @@
 
   let (min-x, min-y, max-x, max-y) = (0, 0, 0, 0)
 
-  for line in metro.lines.values() {
+  for line in radish.lines.values() {
     if line.disabled and not draw-disabled {
       continue
     }
@@ -96,9 +124,9 @@
       }
 
       let transfers = if draw-disabled {
-        metro.transfers.at(sta.id, default: none)
+        radish.transfers.at(sta.id, default: none)
       } else {
-        metro.enabled-transfers.at(sta.id, default: none)
+        radish.enabled-transfers.at(sta.id, default: none)
       }
       let has-transfer = transfers != none
       let is-not-first-transfer = has-transfer and line.id != transfers.at(0)
@@ -116,13 +144,13 @@
       // extract transferred lines
       let tr-lines = if has-transfer {
         for line-id in transfers {
-          let line = metro.lines.at(line-id)
+          let line = radish.lines.at(line-id)
           ((id: line.id, color: line.color, index: line.index, segments: line.segments),)
         }
       }
       let tr-stations = if has-transfer {
         for line-id in transfers {
-          let line = metro.lines.at(line-id)
+          let line = radish.lines.at(line-id)
           (line.stations.at(line.station-indexer.at(sta.id)),)
         }
       }

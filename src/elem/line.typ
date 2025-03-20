@@ -2,6 +2,28 @@
 #import "../core/utils.typ": lerp
 
 
+/// Creates a pin in the line.
+///
+/// As for arguments describing the position, you can just specify one or two. `auto` values will be inferred.
+///
+/// - x (auto, float): Absolute X-coordinate of the pin.
+/// - y (auto, float): Absolute Y-coordinate of the pin.
+/// - dx (auto, float): Relative X-offset from previous pin.
+/// - dy (auto, float): Relative Y-offset from previous pin.
+/// - d (auto, str): Cardinal/diagonal direction from previous pin.
+///
+/// - end (bool): Marks end of a section, allowing disconnected branches.
+///
+/// - cfg (str, none): Enabling conditions for subsequent segments.
+/// - cfg-not (str, none): Disabling conditions for subsequent segments.
+///
+/// - layer (auto, int): Drawing layer for subsequent segments (higher layers draw on top).
+/// - stroke (auto, stroke): Line style for subsequent segments.
+/// - corner-radius (float, none): Radius for rounding this corner.
+///
+/// - ..metadata (arguments): Additional attributes of subsequent segments as named arguments.
+///
+/// -> dictionary
 #let pin(
   x: auto,
   y: auto,
@@ -32,6 +54,20 @@
   )
 }
 
+/// Resolves the final position of a segment end point based on given parameters.
+///
+/// The function handles several cases:
+/// 1. When coordinates are 'auto', calculates actual position based on direction;
+/// 2. For cardinal directions (N,S,E,W), uses appropriate offset;
+/// 3. For diagonal directions (NE,SE,NW,SW), calculates position maintaining 45° angles;
+/// 4. When direction is 'auto', uses available offset or maintains last position.
+///
+/// Returns the modified `end-pos`.
+///
+/// - end-pos (dictionary): A position object containing x, y coordinates and optional dx, dy offsets
+/// - last-pos (dictionary): The previous position object with x, y coordinates.
+/// - dir (auto, str): Direction enum value of the movement direction.
+/// -> dictionary
 #let _resolve-moved(end-pos, last-pos, dir) = {
   if end-pos.x == auto {
     end-pos.x = if dir == auto {
@@ -102,6 +138,16 @@
   end-pos
 }
 
+/// Extracts stations, sections, and segments from a sequence of points defining a metro line.
+///
+/// Requires at least two points to define a valid line.
+/// Each point in the input array can be either a pin or a station.
+///
+/// Returns a dictionary containing stations, sections and segments.
+///
+/// - points (array): Array of point objects containing station and pin information
+/// - line-id (str): Identifier for the metro line
+/// -> dictionary
 #let _extract-stations(points, line-id) = {
   assert(points.len() >= 2, message: "The metro line must have at least two points!")
 
@@ -216,6 +262,19 @@
   return (stations: stations, sections: sections, segments: segments)
 }
 
+/// Constructor of metro line.
+///
+/// Returns a `line` object with some pending properties that should be decided later in a metro system.
+///
+/// - id (str): Unique identifier for the line.
+/// - color (color): The color of the line.
+/// - index (auto, int): Index position of the line.
+/// - optional (bool): Whether the line can be disabled by some features.
+/// - features (dictionary): Features for the line.
+/// - default-features (array): Default features for the line.
+/// - stroke (auto, stroke): Custom stroke for the line.
+/// - ..points (arguments): Pins and stations of the line in sequential order.
+/// -> dictionary
 #let line(
   id: "1",
   color: gray,

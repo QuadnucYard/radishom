@@ -6,7 +6,22 @@
 #let _anchor-orders = (0, 2, 1, 3)
 
 /// Find a best anchor placement with least punishment.
+/// Determines the best anchor position based on path segments and geometric analysis.
+///
+/// This function analyzes a path context and determines the optimal anchor direction
+/// by evaluating angles between segments and applying punishment scores.
+///
+/// - tr-ctx (array): A collection of tuples containing (position, segment index, segments array).
+/// -> str
 #let get-best-anchor-tr(tr-ctx) = {
+  // Algorithm:
+  // 1. Initializes punishment scores for 8 directions (0° to 315° in 45° increments)
+  // 2. For each point in the path:
+  //    - Collects target points from adjacent segments
+  //    - Calculates angles to target points
+  //    - Assigns punishment scores based on angle proximity and orthogonality
+  // 3. Returns the anchor direction with the lowest punishment score
+
   let punishment = (0, 1) * 4 // for 0deg, 45deg, ..., 315deg; prefer ortho
   for (pos, seg-idx, segments) in tr-ctx {
     let seg = segments.at(seg-idx)
@@ -50,8 +65,13 @@
   return _anchors.at(min-index(punishment))
 }
 
-#let get-best-anchor(seg) = {
-  let angle = seg.angle + 90deg
+/// Returns the best anchor position for a line segment.
+/// The function determines the optimal anchor point based on the line segment's angle.
+///
+/// angle (angle): The angle of the line segment.
+/// -> str
+#let get-best-anchor(angle) = {
+  let angle = angle + 90deg
   if angle <= -22.5deg { angle += 180deg }
   let q = calc.rem(int((angle + 22.5deg) / 45.0deg), 4)
   return _anchors.at(q)

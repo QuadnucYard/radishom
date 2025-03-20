@@ -1,7 +1,12 @@
 #import "../core/vec.typ"
 
-
-/// Get a suitable position of the label for the given station based on anchor.
+/// Calculate the optimal position for a transfer station label based on its anchor and neighboring stations.
+///
+/// Returns the optimal label position.
+///
+/// - anchor (str): The directional anchor for the label.
+/// - tr-positions (array): Positions of transferring stations.
+/// - hint (array): Initial (x,y) position hint for the label.
 #let get-transfer-label-pos(anchor, tr-positions, hint) = {
   let (x, y) = hint
   for (x1, y1) in tr-positions {
@@ -19,6 +24,17 @@
   return (x, y)
 }
 
+/// Analyzes metro lines to identify transfer stations between different lines.
+///
+/// This function identifies stations that serve as transfer points between multiple lines.
+///
+/// Returns a dictionary where:
+/// - keys: Station IDs that serve as transfer points;
+/// - values: Arrays of line IDs that intersect at the station.
+/// Note: Only stations that connect two or more lines are included in the result.
+///
+/// - lines (array): An array of line objects.
+/// -> dictionary
 #let _resolve-transfers(lines) = {
   let station-collection = (:) // station-id -> {line-number}
   for line in lines {
@@ -35,12 +51,22 @@
   return station-collection
 }
 
+/// Resolves station positions in a metro map by processing transfer stations and interpolating positions.
+///
+/// Process:
+/// 1. Resolves transfer station positions by finding intersections between line segments;
+/// 2. Interpolates remaining station positions linearly between known positions within segments.
+///
+/// - metro (metro): A metro object.
+/// -> dictionary
 #let _resolve-stations(metro) = {
-  let lines = for (i, line) in metro.lines {
+  let i = 0
+  let lines = for (_, line) in metro.lines {
     // set line index
     if line.index == auto {
       line.index = i
     }
+    i += 1
 
     for (k, sta) in line.stations.enumerate() {
       // resolve station positions by intersection
@@ -110,6 +136,14 @@
   lines.to-dict()
 }
 
+/// Constructor of metro system.
+///
+/// It processes the input lines to resolve stations and interchanges.
+///
+/// - lines (array): An array of line objects.
+/// - features (dictionary): Available features for the metro system.
+/// - default-features (array): Default features of the metro system.
+/// -> metro
 #let metro(lines, features: (:), default-features: ()) = {
   let transfers = _resolve-transfers(lines)
   let mtr = (

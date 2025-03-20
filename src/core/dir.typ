@@ -1,4 +1,5 @@
 
+/// Cardinal and intercardinal direction constants.
 #let dirs = (
   N: "north",
   S: "south",
