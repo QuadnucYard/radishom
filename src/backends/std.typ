@@ -49,6 +49,25 @@
   }
 }
 
+/* Calculates a rounded corner between two line segments.
+ *
+ * Parameters:
+ * - pt: (float, float) The corner point where the two lines meet
+ * - p1: (float, float) The endpoint of the first line segment
+ * - p2: (float, float) The endpoint of the second line segment
+ * - radius: float The desired radius of the rounded corner
+ * - u: float Scale factor for the output coordinates
+ *
+ * Returns:
+ * A tuple containing two curve segments that form the rounded corner:
+ * - A line segment from the first arc point
+ * - A cubic Bézier curve connecting the two arc points
+ *
+ * The function clamps the radius to prevent it from exceeding half the length
+ * of either line segment. It generates a smooth transition between the lines
+ * using a combination of a straight line and a cubic Bézier curve.
+ * The resulting coordinates are scaled by factor u, with y-coordinates inverted.
+ */
 #let _round-corner(pt, p1, p2, radius, u) = {
   // here we avoid func-call to improve performance
   let (x0, y0) = pt
@@ -71,6 +90,24 @@
   )
 }
 
+/// Creates a sequence of curve points from given points with optional corner rounding
+///
+/// Parameters:
+/// - points: Array of points where each point can be either:
+///   - A simple coordinate pair (x, y)
+///   - An array containing a coordinate pair and a radius for rounded corners
+/// - u: Scaling factor for coordinates
+///
+/// Returns:
+/// Array of curve commands (move and line operations) with coordinates scaled by u
+/// and y-coordinates inverted. If a point includes a radius, it generates rounded
+/// corners using _round-corner function.
+///
+/// Example:
+/// ```typst
+/// let points = ((0,0), ((1,1), 0.5), (2,0))
+/// _make-curve(points, 10)
+/// ```
 #let _make-curve(points, u) = {
   let extract(pt) = {
     if type(pt.at(0)) == array { pt.at(0) } else { pt }
@@ -117,6 +154,34 @@
   place(shape)
 }
 
+/* Renders a visual task with various graphical elements.
+
+This function takes a task object and a unit length, then renders all components
+of the task including backgrounds, grids, lines, markers, labels and foreground elements.
+
+Parameters:
+- task: A task object containing:
+  - grid: Grid configuration with coordinates
+  - background-color: Color for the canvas background
+  - background: Array of background elements (polygons with optional labels)
+  - show-grid: Boolean controlling grid visibility
+  - lines: Array of line objects with points and stroke styles, sorted by layer
+  - markers: Array of marker objects with body content and position
+  - labels: Array of label objects with body, position and visibility settings
+  - foreground: Array of foreground elements with body and position
+- unit-length: The base unit length for scaling coordinates
+
+The render order is:
+1. Canvas with background color
+2. Background elements
+3. Grid (if enabled)
+4. Lines (sorted by layer)
+5. Markers
+6. Labels
+7. Foreground elements
+
+Each element is placed according to its specified position scaled by the unit-length.
+*/
 #let render(task, unit-length) = {
   show: _get-canvas(task.grid.coords, unit-length, fill: task.background-color)
 

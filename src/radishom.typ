@@ -19,9 +19,7 @@
   station-plugins: (),
   draw-disabled: false,
 ) = {
-  let (backend, components) = if backend == "cetz" {
-    (backends.use("cetz"), dictionary(components.use("cetz")))
-  } else if backend == "std" {
+  let (backend, components) = if backend == "std" {
     (backends.use("std"), dictionary(components.use("std")))
   } else {
     assert(
