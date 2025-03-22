@@ -173,7 +173,9 @@
 
       // set stations counted once as terminuses
       for idx in pick-once-elements(candidate-terminuses) {
-        line.stations.at(idx).terminal = true
+        if "on-loop" not in line.stations.at(idx) {
+          line.stations.at(idx).terminal = true
+        }
       }
     }
 

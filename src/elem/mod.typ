@@ -1,4 +1,4 @@
-#import "line.typ": line, pin
+#import "line.typ": line, loop, pin
 #import "metro.typ": metro
 #import "radish.typ": radish
 #import "shapes.typ": polygon

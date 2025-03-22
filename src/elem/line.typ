@@ -1,4 +1,4 @@
-#import "../core/dir.typ": dirs
+#import "../core/dir.typ": resolve-target-pos
 #import "../core/utils.typ": lerp
 
 
@@ -31,6 +31,7 @@
   dy: auto,
   d: auto,
   end: false,
+  reverse: auto,
   cfg: auto,
   cfg-not: auto,
   layer: auto,
@@ -39,12 +40,9 @@
   ..metadata,
 ) = {
   (
-    x: x,
-    y: y,
-    dx: dx,
-    dy: dy,
-    d: d,
+    raw-pos: (x: x, y: y, dx: dx, dy: dy, d: d),
     end: end,
+    reverse: reverse,
     cfg: cfg,
     cfg-not: cfg-not,
     layer: layer,
@@ -54,88 +52,37 @@
   )
 }
 
-/// Resolves the final position of a segment end point based on given parameters.
+/// Close the path by adding a line to the starting point or specified point.
 ///
-/// The function handles several cases:
-/// 1. When coordinates are 'auto', calculates actual position based on direction;
-/// 2. For cardinal directions (N,S,E,W), uses appropriate offset;
-/// 3. For diagonal directions (NE,SE,NW,SW), calculates position maintaining 45° angles;
-/// 4. When direction is 'auto', uses available offset or maintains last position.
+/// - target (auto, str): The target station id where the loop ends.
 ///
-/// Returns the modified `end-pos`.
+/// - cfg (str, none): Enabling conditions for subsequent segments.
+/// - cfg-not (str, none): Disabling conditions for subsequent segments.
 ///
-/// - end-pos (dictionary): A position object containing x, y coordinates and optional dx, dy offsets
-/// - last-pos (dictionary): The previous position object with x, y coordinates.
-/// - dir (auto, str): Direction enum value of the movement direction.
-/// -> dictionary
-#let _resolve-moved(end-pos, last-pos, dir) = {
-  if end-pos.x == auto {
-    end-pos.x = if dir == auto {
-      if end-pos.dx != auto {
-        last-pos.x + end-pos.dx
-      } else {
-        last-pos.x
-      }
-    } else if dir == dirs.E or dir == dirs.W {
-      last-pos.x + end-pos.dx
-    } else if dir == dirs.N or dir == dirs.S {
-      last-pos.x
-    } else if dir == dirs.NE or dir == dirs.SW {
-      let dx = if end-pos.dx != auto {
-        end-pos.dx
-      } else if end-pos.dy != auto {
-        end-pos.dy
-      } else {
-        end-pos.y - last-pos.y
-      }
-      last-pos.x + dx
-    } else if dir == dirs.SE or dir == dirs.NW {
-      let dx = if end-pos.dx != auto {
-        end-pos.dx
-      } else if end-pos.dy != auto {
-        -end-pos.dy
-      } else {
-        -(end-pos.y - last-pos.y)
-      }
-      last-pos.x + dx
-    } else {
-      last-pos.x
-    }
-  }
-  if end-pos.y == auto {
-    end-pos.y = if dir == auto {
-      if end-pos.dy != auto {
-        last-pos.y + end-pos.dy
-      } else {
-        last-pos.y
-      }
-    } else if dir == dirs.N or dir == dirs.S {
-      last-pos.y + end-pos.dy
-    } else if dir == dirs.E or dir == dirs.W {
-      last-pos.y
-    } else if dir == dirs.NE or dir == dirs.SW {
-      let dy = if end-pos.dy != auto {
-        end-pos.dy
-      } else if end-pos.dx != auto {
-        end-pos.dx
-      } else {
-        end-pos.x - last-pos.x
-      }
-      last-pos.y + dy
-    } else if dir == dirs.SE or dir == dirs.NW {
-      let dy = if end-pos.dy != auto {
-        end-pos.dy
-      } else if end-pos.dx != auto {
-        -end-pos.dx
-      } else {
-        -(end-pos.x - last-pos.x)
-      }
-      last-pos.y + dy
-    } else {
-      last-pos.y
-    }
-  }
-  end-pos
+/// - layer (auto, int): Drawing layer for subsequent segments (higher layers draw on top).
+/// - stroke (auto, stroke): Line style for subsequent segments.
+/// - corner-radius (float, none): Radius for rounding this corner.
+///
+/// - ..metadata (arguments): Additional attributes of subsequent segments as named arguments.
+#let loop(
+  target: auto,
+  cfg: auto,
+  cfg-not: auto,
+  layer: auto,
+  stroke: auto,
+  corner-radius: none,
+  ..metadata,
+) = {
+  (
+    loop-target: target,
+    end: true,
+    cfg: cfg,
+    cfg-not: cfg-not,
+    layer: layer,
+    stroke: stroke,
+    corner-radius: corner-radius,
+    metadata: metadata.named(),
+  )
 }
 
 /// Extracts stations, sections, and segments from a sequence of points defining a metro line.
@@ -161,36 +108,49 @@
   )
 
   let sections = ()
-  let section-points = ((last-pin.x, last-pin.y),)
+  let section-points = ()
   let segments = ()
   let stations = ()
 
-  let first = 1 // index of control point
-  while first < points.len() {
-    let last = first
-    while "id" in points.at(last) {
-      last += 1 // skip stations
-    }
-    let tar-pos = {
-      let cur-point = points.at(last) // a pin
-      _resolve-moved(cur-point, last-pin, cur-point.d)
+  let (sx, sy) = (last-pin.raw-pos.x, last-pin.raw-pos.y)
+  let start-pos = (sx, sy)
+  section-points.push(start-pos)
+  let start-station-index = 0
+
+  let seg-first = 1 // index of control point
+  while seg-first < points.len() {
+    let seg-last = seg-first
+    while "id" in points.at(seg-last) {
+      seg-last += 1 // skip stations
     }
 
-    let (sx, sy) = (last-pin.x, last-pin.y)
-    let (tx, ty) = (tar-pos.x, tar-pos.y)
+    let cur-pin = points.at(seg-last)
+    let (tx, ty) = if "loop-target" in cur-pin {
+      if cur-pin.loop-target != auto {
+        while start-station-index < stations.len() and stations.at(start-station-index).id != cur-pin.loop-target {
+          start-station-index += 1
+        }
+        stations.at(start-station-index).pos
+      } else {
+        start-pos
+      }
+    } else {
+      resolve-target-pos((x: sx, y: sy), cur-pin.raw-pos)
+    }
+
     let angle = calc.atan2(tx - sx, ty - sy)
 
     let seg = (
       start: (sx, sy),
       end: (tx, ty),
       angle: angle,
-      range: (start: stations.len(), end: stations.len() + last - first),
+      range: (start: stations.len(), end: stations.len() + seg-last - seg-first),
       cfg: cur-attrs.cfg,
       cfg-not: cur-attrs.cfg-not,
     )
 
     // process stations on this segment
-    for sta in points.slice(first, last) {
+    for sta in points.slice(seg-first, seg-last) {
       sta.segment = segments.len()
 
       let (x, y, r, dx, dy) = sta.remove("raw-pos")
@@ -212,7 +172,14 @@
       sta.pos = if x == auto or y == auto { auto } else { (x, y) } // mark pos auto, handle it later
       stations.push(sta)
     }
-    if tar-pos.end {
+    if "loop-target" in cur-pin {
+      let i = start-station-index
+      while i < stations.len() {
+        stations.at(i).on-loop = true
+        i += 1
+      }
+    }
+    if cur-pin.end {
       stations.last().trunc = true // mark section truncated here
       if stations.last().pos == auto {
         stations.last().pos = seg.end
@@ -222,19 +189,22 @@
 
     // update current pin and cfg
     let prev-attrs = cur-attrs
-    if tar-pos.cfg != auto { cur-attrs.cfg = tar-pos.cfg }
-    if tar-pos.cfg-not != auto { cur-attrs.cfg-not = tar-pos.cfg-not }
-    if tar-pos.layer != auto { cur-attrs.cfg-not = tar-pos.layer }
-    if tar-pos.stroke != auto { cur-attrs.stroke = tar-pos.stroke }
-    cur-attrs.metadata += tar-pos.metadata
+    if cur-pin.cfg != auto { cur-attrs.cfg = cur-pin.cfg }
+    if cur-pin.cfg-not != auto { cur-attrs.cfg-not = cur-pin.cfg-not }
+    if cur-pin.layer != auto { cur-attrs.cfg-not = cur-pin.layer }
+    if cur-pin.stroke != auto { cur-attrs.stroke = cur-pin.stroke }
+    cur-attrs.metadata += cur-pin.metadata
 
     // add section point
     if not last-pin.end {
-      section-points.push(if tar-pos.corner-radius == none {
+      section-points.push(if cur-pin.corner-radius == none {
         seg.end
       } else {
-        (seg.end, tar-pos.corner-radius)
+        (seg.end, cur-pin.corner-radius)
       })
+    } else {
+      start-pos = (tx, ty)
+      start-station-index = stations.len()
     }
 
     if last-pin.end or cur-attrs != prev-attrs {
@@ -242,8 +212,10 @@
       section-points = (seg.end,)
     }
 
-    last-pin = tar-pos
-    first = last + 1
+    last-pin = cur-pin
+    sx = tx
+    sy = ty
+    seg-first = seg-last + 1
   }
   if section-points.len() > 0 {
     sections.push((points: section-points, ..cur-attrs))
