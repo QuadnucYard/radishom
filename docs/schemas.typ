@@ -80,6 +80,7 @@
     sections: z.array(section),
     segments: z.array(segment),
     stations: z.array(station),
+    ordered-stations: z.array(z.string()),
     station-indexer: z.mapping(z.integer(), key-name: "station-id"),
     optional: z.boolean(),
     features: z.mapping(z.array(z.string())),

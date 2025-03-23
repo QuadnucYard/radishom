@@ -13,6 +13,8 @@
 /// - d (auto, str): Cardinal/diagonal direction from previous pin.
 ///
 /// - end (bool): Marks end of a section, allowing disconnected branches.
+/// - reverse (auto, bool): Whether the order of subsequent stations should be reversed.
+/// - reverse-before (bool): Whether to reverse the order of all previous stations.
 ///
 /// - cfg (str, none): Enabling conditions for subsequent segments.
 /// - cfg-not (str, none): Disabling conditions for subsequent segments.
@@ -32,6 +34,7 @@
   d: auto,
   end: false,
   reverse: auto,
+  reverse-before: false,
   cfg: auto,
   cfg-not: auto,
   layer: auto,
@@ -42,7 +45,8 @@
   (
     raw-pos: (x: x, y: y, dx: dx, dy: dy, d: d),
     end: end,
-    reverse: reverse,
+    reversed: reverse,
+    reverse-before: reverse-before,
     cfg: cfg,
     cfg-not: cfg-not,
     layer: layer,
@@ -56,6 +60,9 @@
 ///
 /// - target (auto, str): The target station id where the loop ends.
 ///
+/// - reverse (auto, bool): Whether the order of subsequent stations should be reversed.
+/// - reverse-before (bool): Whether to reverse the order of all previous stations.
+///
 /// - cfg (str, none): Enabling conditions for subsequent segments.
 /// - cfg-not (str, none): Disabling conditions for subsequent segments.
 ///
@@ -66,6 +73,8 @@
 /// - ..metadata (arguments): Additional attributes of subsequent segments as named arguments.
 #let loop(
   target: auto,
+  reverse: auto,
+  reverse-before: false,
   cfg: auto,
   cfg-not: auto,
   layer: auto,
@@ -76,6 +85,8 @@
   (
     loop-target: target,
     end: true,
+    reversed: reverse,
+    reverse-before: reverse-before,
     cfg: cfg,
     cfg-not: cfg-not,
     layer: layer,
@@ -100,6 +111,7 @@
 
   let last-pin = points.at(0) // resolved point
   let cur-attrs = (
+    reversed: if last-pin.reversed == auto { false } else { last-pin.reversed },
     cfg: if last-pin.cfg == auto { none } else { last-pin.cfg },
     cfg-not: if last-pin.cfg-not == auto { none } else { last-pin.cfg-not },
     layer: if last-pin.layer == auto { 0 } else { last-pin.layer },
@@ -111,13 +123,15 @@
   let section-points = ()
   let segments = ()
   let stations = ()
+  let ordered-stations = ()
 
   let (sx, sy) = (last-pin.raw-pos.x, last-pin.raw-pos.y)
   let start-pos = (sx, sy)
   section-points.push(start-pos)
   let start-station-index = 0
+  let reverse-first = if cur-attrs.reversed { 0 } else { -1 }
 
-  let seg-first = 1 // index of control point
+  let seg-first = 1 // Current range of stations in `points`: [`seg-first`, `seg-last`)
   while seg-first < points.len() {
     let seg-last = seg-first
     while "id" in points.at(seg-last) {
@@ -171,6 +185,7 @@
       sta.line = line-id
       sta.pos = if x == auto or y == auto { auto } else { (x, y) } // mark pos auto, handle it later
       stations.push(sta)
+      ordered-stations.push(sta.id)
     }
     if "loop-target" in cur-pin {
       let i = start-station-index
@@ -189,6 +204,7 @@
 
     // update current pin and cfg
     let prev-attrs = cur-attrs
+    if cur-pin.reversed != auto { cur-attrs.reversed = cur-pin.reversed }
     if cur-pin.cfg != auto { cur-attrs.cfg = cur-pin.cfg }
     if cur-pin.cfg-not != auto { cur-attrs.cfg-not = cur-pin.cfg-not }
     if cur-pin.layer != auto { cur-attrs.cfg-not = cur-pin.layer }
@@ -210,12 +226,29 @@
     if last-pin.end or cur-attrs != prev-attrs {
       sections.push((points: section-points, ..prev-attrs))
       section-points = (seg.end,)
+      // handle reversal
+      if not cur-attrs.reversed {
+        if prev-attrs.reversed {
+          ordered-stations = ordered-stations.slice(0, reverse-first) + ordered-stations.slice(reverse-first).rev()
+        }
+        reverse-first = ordered-stations.len()
+      }
+      // reverse all stations before
+      if last-pin.reverse-before {
+        ordered-stations = ordered-stations.rev()
+      }
     }
 
     last-pin = cur-pin
     sx = tx
     sy = ty
     seg-first = seg-last + 1
+  }
+  if cur-attrs.reversed {
+    ordered-stations = ordered-stations.slice(0, reverse-first) + ordered-stations.slice(reverse-first).rev()
+  }
+  if last-pin.reverse-before {
+    ordered-stations = ordered-stations.rev()
   }
   if section-points.len() > 0 {
     sections.push((points: section-points, ..cur-attrs))
@@ -231,7 +264,7 @@
     }
   }
 
-  return (stations: stations, sections: sections, segments: segments)
+  return (stations: stations, sections: sections, segments: segments, ordered-stations: ordered-stations)
 }
 
 /// Constructor of metro line.
@@ -257,7 +290,7 @@
   stroke: auto,
   ..points,
 ) = {
-  let (stations, sections, segments) = _extract-stations(points.pos(), id)
+  let (stations, sections, segments, ordered-stations) = _extract-stations(points.pos(), id)
   let station-indexer = stations.enumerate().map(((i, sta)) => (sta.id, i)).to-dict()
   let data = (
     id: id,
@@ -266,6 +299,7 @@
     sections: sections,
     segments: segments,
     stations: stations,
+    ordered-stations: ordered-stations,
     station-indexer: station-indexer,
     optional: optional,
     features: features,
