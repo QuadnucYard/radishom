@@ -15,8 +15,8 @@
 ///
 /// The function handles several cases:
 /// 1. When coordinates are 'auto', calculates actual position based on direction;
-/// 2. For cardinal directions (N,S,E,W), uses appropriate offset;
-/// 3. For diagonal directions (NE,SE,NW,SW), calculates position maintaining 45° angles;
+/// 2. For cardinal directions `(N,S,E,W)`, uses appropriate offset;
+/// 3. For diagonal directions `(NE,SE,NW,SW)`, calculates position maintaining 45° angles;
 /// 4. When direction is 'auto', uses available offset or maintains last position.
 ///
 /// Returns the modified `end-pos`.
@@ -93,4 +93,33 @@
     origin.y
   }
   (x, y)
+}
+
+/// Takes a variable number of points with walking directions and returns an array of resolved positions.
+///
+/// *Example:*
+/// ```example
+/// #walk((0, 0), (y: 2), (x: 2, d: "north-east"), (dx: 2))
+/// ```
+///
+/// - ..points (arguments): Variable number of points. Each point should be either:
+///   - An array with `(x, y)` coordinates;
+///   - A dictionary with optional keys `(x, y, dx, dy, d)`;
+/// -> array
+#let walk(..points) = {
+  let points = points.pos()
+  assert(points.len() > 0, message: "You should provide at least one point!")
+
+  let auto-pos = (x: auto, y: auto, dx: auto, dy: auto, d: auto)
+  let last-pos = none
+  let resolved = ()
+
+  for p in points {
+    let cur-pos = auto-pos + (if type(p) == array { (x: p.at(0), y: p.at(1)) } else { p })
+    cur-pos = resolve-target-pos(last-pos, cur-pos)
+    resolved.push(cur-pos)
+    last-pos = (x: cur-pos.at(0), y: cur-pos.at(1))
+  }
+
+  resolved
 }

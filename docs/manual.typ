@@ -117,13 +117,16 @@
 
 == Utilities
 
-#{
-  import "/src/core/utils.typ"
-  import "/src/core/feature.typ"
-
-  show-module("core/dir")
-  show-module("core/anchor")
-  show-module("core/feature", scope: dictionary(feature))
-  // show-module("core/vec")
-  show-module("core/utils", scope: dictionary(utils))
+#let q-import(path) = {
+  import path as mod
+  dictionary(mod)
 }
+#let show-module-(path) = {
+  show-module(path, scope: q-import("/src/" + path + ".typ"))
+}
+
+#show-module-("core/dir")
+#show-module-("core/anchor")
+#show-module-("core/feature")
+// show-module("core/vec")
+#show-module-("core/utils")
