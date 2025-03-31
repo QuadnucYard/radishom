@@ -99,6 +99,12 @@
       if sec.disabled and not draw-disabled {
         continue
       }
+      for p in sec.points {
+        min-x = calc.min(min-x, p.at(0))
+        min-y = calc.min(min-y, p.at(1))
+        max-x = calc.max(max-x, p.at(0))
+        max-y = calc.max(max-y, p.at(1))
+      }
       let sec-par = (
         layer: sec.layer,
         stroke: sec.stroke,
