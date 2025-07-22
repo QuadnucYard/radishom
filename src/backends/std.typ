@@ -20,6 +20,7 @@
     width: (x2 - x1) * u,
     height: (y2 - y1) * u,
     fill: fill,
+    breakable: false,
   )
 }
 

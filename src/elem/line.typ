@@ -255,14 +255,14 @@
   }
 
   // Set positions for terminal stations
-  if stations.len() > 0 {
-    if stations.first().pos == auto {
-      stations.first().pos = segments.first().start
-    }
-    if stations.last().pos == auto {
-      stations.last().pos = segments.last().end
-    }
-  }
+  // if stations.len() > 0 {
+  //   if stations.first().pos == auto {
+  //     stations.first().pos = segments.first().start
+  //   }
+  //   if stations.last().pos == auto {
+  //     stations.last().pos = segments.last().end
+  //   }
+  // }
 
   return (stations: stations, sections: sections, segments: segments, ordered-stations: ordered-stations)
 }
