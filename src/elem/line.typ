@@ -196,7 +196,7 @@
     }
     if cur-pin.end {
       stations.last().trunc = true // mark section truncated here
-      if stations.last().pos == auto {
+      if stations.last().segment == segments.len() and stations.last().pos == auto {
         stations.last().pos = seg.end
       }
     }
@@ -256,14 +256,13 @@
 
   // Set positions for terminal stations
   if stations.len() > 0 {
-    if stations.first().pos == auto {
+    if stations.first().pos == auto and stations.first().segment == 0 {
       stations.first().pos = segments.first().start
     }
-    if stations.last().pos == auto {
+    if stations.last().pos == auto and stations.last().segment == segments.len() - 1 {
       stations.last().pos = segments.last().end
     }
   }
-
   return (stations: stations, sections: sections, segments: segments, ordered-stations: ordered-stations)
 }
 
