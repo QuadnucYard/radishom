@@ -24,9 +24,9 @@
 ///
 /// - anchor (auto, vec2): Text anchor point position
 /// - marker-pos (auto, vec2): Custom marker position
-/// - marker-offset (none, vec2): Fine-tune marker placement
+/// - marker-offset (vec2, none): Fine-tune marker placement
 /// - label-pos (auto, vec2): Custom label position
-/// - label-offset (none, vec2): Fine-tune label placement
+/// - label-offset (vec2, none): Fine-tune label placement
 ///
 /// - ..metadata (arguments): Additional station properties as named arguments.
 ///

@@ -32,6 +32,8 @@
 
 = Usage
 
+#include "usage.typ"
+
 
 = Schemas
 

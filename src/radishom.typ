@@ -15,7 +15,7 @@
 /// - backend (str, module, dictionary): The rendering backend to use. Can be `"std"` or custom.
 ///
 /// - unit-length (length): The base unit length for the map.
-/// - grid (auto, none, array): Grid configuration. Can be custom coordinates in form of `((x1, y1), (x2, y2))`.
+/// - grid (auto, array, none): Grid configuration. Can be custom coordinates in form of `((x1, y1), (x2, y2))`.
 /// - foreground (array): Collection of foreground elements.
 /// - background (array): Collection of background elements.
 /// - background-color (color): Background color of the map.
@@ -25,9 +25,9 @@
 ///   Signature: `(line, station, tr-lines, tr-stations) -> content`.
 /// - label-renderer (auto, function): Function to render station labels.
 ///   Signature: `(station) -> content`.
-/// - line-plugins (array): Collection of line rendering plugins.
+/// - for-each-line (array): Collection of line rendering plugins.
 ///   Signature: `(line-par) -> content | none`.
-/// - station-plugins (array): Collection of station rendering plugins.
+/// - for-each-station (array): Collection of station rendering plugins.
 ///   Signature: `(line-par, station) -> content | none`.
 /// - draw-disabled (bool): Whether to draw disabled lines and stations.
 ///
@@ -43,8 +43,8 @@
   line-stroker: auto,
   marker-renderer: auto,
   label-renderer: auto,
-  line-plugins: (),
-  station-plugins: (),
+  for-each-line: (),
+  for-each-station: (),
   draw-disabled: false,
 ) = {
   let (backend, components) = if backend == "std" {
@@ -197,7 +197,7 @@
         task.labels.push((pos: label-pos, body: label, anchor: sta.anchor, hidden: hidden))
       }
 
-      for plugin in station-plugins {
+      for plugin in for-each-station {
         let fg = plugin(line-par, sta)
         if fg != none {
           task.foreground.push(fg)
@@ -205,7 +205,7 @@
       }
     }
 
-    for plugin in line-plugins {
+    for plugin in for-each-line {
       let fg = plugin(line-par)
       if fg != none {
         task.foreground.push(fg)
