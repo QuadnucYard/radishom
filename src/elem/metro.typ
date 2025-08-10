@@ -77,10 +77,6 @@
         let seg = line.segments.at(sta.segment)
         for line-id in metro.transfers.at(sta.id) {
           let line2 = metro.lines.at(line-id)
-          if line2.id != line.id {
-            let sta2 = line2.stations.at(line2.station-indexer.at(sta.id))
-            let seg2 = line2.segments.at(sta2.segment)
-          }
           let sta2 = line2.stations.at(line2.station-indexer.at(sta.id))
           let seg2 = line2.segments.at(sta2.segment)
           let pt = vec.intersect-line-line(seg.start, seg.end, seg2.start, seg2.end)
