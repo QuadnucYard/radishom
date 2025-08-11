@@ -1,55 +1,47 @@
-use std::collections::BTreeMap;
-
 use indexmap::IndexMap;
-use serde::{Deserialize, Serialize};
+use serde_derive::{Deserialize, Serialize};
 
 use crate::{
+    feature::{FeatureMap, FeatureVec},
     layout::positioning::resolve_stations_final_pos,
-    model::{
-        line::{LineId, LineV1, LineV2},
-        station::StationId,
-    },
+    model::line::{LineId, LineV0, LineV2},
+    network::transfers::{Transfers, resolve_transfers},
 };
 
 #[derive(Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct MetroV1 {
-    pub lines: Vec<LineV1>,
+pub struct MetroV0 {
+    pub lines: Vec<LineV0>,
+
+    pub features: FeatureMap,
+    pub default_features: FeatureVec,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct MetroV2 {
+pub struct MetroV1 {
     pub lines: IndexMap<LineId, LineV2>,
-    pub transfers: BTreeMap<StationId, Vec<LineId>>,
+    pub transfers: Transfers,
+
+    pub features: FeatureMap,
+    pub default_features: FeatureVec,
 }
 
-impl MetroV1 {
-    pub fn resolve(self) -> MetroV2 {
-        let transfers = resolve_transfers(&self.lines);
-        let lines = resolve_stations_final_pos(self.lines, &transfers);
-        MetroV2 { lines, transfers }
-    }
-}
+impl MetroV0 {
+    pub fn resolve(self) -> MetroV1 {
+        let lines = self
+            .lines
+            .into_iter()
+            .map(|line| line.resolve())
+            .collect::<Vec<_>>();
+        let transfers = resolve_transfers(&lines);
+        let lines = resolve_stations_final_pos(lines, &transfers);
+        MetroV1 {
+            lines,
+            transfers,
 
-fn resolve_transfers(lines: &[LineV1]) -> BTreeMap<StationId, Vec<LineId>> {
-    let mut station_collection = BTreeMap::<StationId, Vec<LineId>>::new();
-
-    for line in lines {
-        for station in line.stations.iter() {
-            let entry = station_collection.entry(station.id.clone()).or_default();
-            entry.push(line.id.clone());
+            features: self.features,
+            default_features: self.default_features,
         }
     }
-
-    station_collection
-        .into_iter()
-        .filter_map(|(station_id, lines)| {
-            if lines.len() > 1 {
-                Some((station_id, lines))
-            } else {
-                None
-            }
-        })
-        .collect()
 }

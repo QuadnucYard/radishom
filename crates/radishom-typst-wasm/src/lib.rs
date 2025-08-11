@@ -1,25 +1,13 @@
-use radishom_core::model::{line::LineV0, metro::MetroV1};
+use radishom_core::model::radish::RadishV0;
 use typst_wasm_protocol::wasm_export;
 
 #[wasm_export]
-pub fn construct_line(data: &[u8]) -> Result<Vec<u8>, String> {
-    let input_line: LineV0 =
+pub fn construct_radish(data: &[u8]) -> Result<Vec<u8>, String> {
+    let input: RadishV0 =
         ciborium::from_reader(data).map_err(|e| format!("Failed to deserialize: {e}"))?;
-    let output_line = input_line.resolve();
+    let output = input.resolve();
     let mut buf = Vec::new();
-    ciborium::into_writer(&output_line, &mut buf)
-        .map_err(|e| format!("Failed to serialize: {e}"))?;
-    Ok(buf)
-}
-
-#[wasm_export]
-pub fn construct_metro(data: &[u8]) -> Result<Vec<u8>, String> {
-    let input_metro: MetroV1 =
-        ciborium::from_reader(data).map_err(|e| format!("Failed to deserialize: {e}"))?;
-    let output_metro = input_metro.resolve();
-    let mut buf = Vec::new();
-    ciborium::into_writer(&output_metro, &mut buf)
-        .map_err(|e| format!("Failed to serialize: {e}"))?;
+    ciborium::into_writer(&output, &mut buf).map_err(|e| format!("Failed to serialize: {e}"))?;
     Ok(buf)
 }
 

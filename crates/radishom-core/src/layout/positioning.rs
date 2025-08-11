@@ -1,14 +1,15 @@
-use std::collections::BTreeMap;
-
+use ecow::EcoString;
 use indexmap::IndexMap;
 
 use crate::{
+    feature::FeatureCondition,
     math::{FloatExt, Vec2, geom::intersect_line_segments},
     model::{
-        Smart,
-        line::{AccumulatedAttrs, LineComponent, LineId, LineV1, LineV2, Section, Segment},
+        line::{LineComponent, LineId, LineV1, LineV2, Pin, Section, Segment},
         station::{StationId, StationV1},
     },
+    network::transfers::Transfers,
+    util::Smart,
 };
 
 pub(crate) struct StationResolution {
@@ -75,8 +76,11 @@ pub(crate) fn extract_stations(
             end: target_pos,
             angle,
             range: stations.len()..stations.len() + (seg_last - seg_first),
-            cfg: cur_attrs.cfg.clone(),
-            cfg_not: cur_attrs.cfg_not.clone(),
+            cfg: FeatureCondition {
+                required: cur_attrs.cfg.clone(),
+                excluded: cur_attrs.cfg_not.clone(),
+            },
+            disabled: false,
         };
 
         // process stations on this segment
@@ -117,12 +121,15 @@ pub(crate) fn extract_stations(
                 segment: segments.len(),
 
                 pos: sta_pos,
+                branch: sta.branch,
                 on_loop: false,
                 trunc: false,
                 no_transfer: sta.no_transfer,
 
-                cfg: sta.cfg.clone(),
-                cfg_not: sta.cfg_not.clone(),
+                cfg: FeatureCondition {
+                    required: sta.cfg.clone(),
+                    excluded: sta.cfg_not.clone(),
+                },
 
                 anchor: sta.anchor,
             });
@@ -160,8 +167,16 @@ pub(crate) fn extract_stations(
         if last_pin.end || cur_attrs != prev_attrs {
             sections.push(Section {
                 points: std::mem::replace(&mut section_points, vec![(target_pos, None)]),
-                attrs: cur_attrs.clone(),
                 cut: seg_last,
+
+                reversed: cur_attrs.reversed,
+                cfg: FeatureCondition {
+                    required: cur_attrs.cfg.clone(),
+                    excluded: cur_attrs.cfg_not.clone(),
+                },
+                layer: cur_attrs.layer,
+
+                disabled: false,
             });
 
             // handle reversal
@@ -192,8 +207,16 @@ pub(crate) fn extract_stations(
     if !section_points.is_empty() {
         sections.push(Section {
             points: section_points,
-            attrs: cur_attrs,
             cut: seg_first,
+
+            reversed: cur_attrs.reversed,
+            cfg: FeatureCondition {
+                required: cur_attrs.cfg.clone(),
+                excluded: cur_attrs.cfg_not.clone(),
+            },
+            layer: cur_attrs.layer,
+
+            disabled: false,
         });
     }
 
@@ -219,7 +242,7 @@ pub(crate) fn extract_stations(
 
 pub(crate) fn resolve_stations_final_pos(
     lines: Vec<LineV1>,
-    transfers: &BTreeMap<StationId, Vec<LineId>>,
+    transfers: &Transfers,
 ) -> IndexMap<LineId, LineV2> {
     // todo: reduce allocations
     lines
@@ -305,6 +328,11 @@ pub(crate) fn resolve_stations_final_pos(
                     last_known_idx = next_known_idx;
                 }
             }
+            let station_indexer = stations
+                .iter()
+                .enumerate()
+                .map(|(i, sta)| (sta.id.clone(), i))
+                .collect();
             (
                 line.id.clone(),
                 LineV2 {
@@ -315,13 +343,46 @@ pub(crate) fn resolve_stations_final_pos(
                     segments: line.segments.clone(),
                     stations: stations.into_iter().map(StationV1::into).collect(),
                     ordered_stations: line.ordered_stations.clone(),
-                    station_indexer: line.station_indexer.clone(),
+                    station_indexer,
 
                     optional: line.optional,
                     features: line.features.clone(),
                     default_features: line.default_features.clone(),
+
+                    disabled: false,
                 },
             )
         })
         .collect()
+}
+
+#[derive(Clone, PartialEq, Eq)]
+struct AccumulatedAttrs {
+    pub reversed: bool,
+    pub cfg: Option<EcoString>,
+    pub cfg_not: Option<EcoString>,
+    pub layer: i32,
+    pub stroke: Smart<EcoString>, // stub for comparison
+}
+
+impl AccumulatedAttrs {
+    pub fn from_pin(pin: &Pin) -> Self {
+        Self {
+            reversed: pin.reversed.unwrap_or(false),
+            cfg: pin.cfg.clone().unwrap_or(None),
+            cfg_not: pin.cfg_not.clone().unwrap_or(None),
+            layer: pin.layer.unwrap_or(0),
+            stroke: pin.stroke.clone(),
+        }
+    }
+
+    pub fn renewed(&self, pin: &Pin) -> Self {
+        Self {
+            reversed: pin.reversed.unwrap_or(self.reversed),
+            cfg: pin.cfg.clone().unwrap_or_else(|| self.cfg.clone()),
+            cfg_not: pin.cfg_not.clone().unwrap_or_else(|| self.cfg_not.clone()),
+            layer: pin.layer.unwrap_or(self.layer),
+            stroke: pin.stroke.clone().or_else(|| self.stroke.clone()),
+        }
+    }
 }

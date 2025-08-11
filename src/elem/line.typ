@@ -43,6 +43,7 @@
   ..metadata,
 ) = {
   (
+    type: "Pin",
     raw-pos: (x: x, y: y, dx: dx, dy: dy, d: d),
     end: end,
     reversed: reverse,
@@ -83,6 +84,7 @@
   ..metadata,
 ) = {
   (
+    type: "Pin",
     loop-target: target,
     end: true,
     reversed: reverse,
@@ -287,49 +289,18 @@
   features: (:),
   default-features: (),
   stroke: auto,
-  ..points,
+  ..components,
 ) = {
-  let (stations, sections, segments, ordered-stations) = _extract-stations(points.pos(), id)
-  let station-indexer = stations.enumerate().map(((i, sta)) => (sta.id, i)).to-dict()
   let data = (
     id: id,
     color: color,
     index: index,
-    sections: sections,
-    segments: segments,
-    stations: stations,
-    ordered-stations: ordered-stations,
-    station-indexer: station-indexer,
-    optional: optional,
-    features: features,
-    default-features: default-features,
-    metadata: points.named(),
-  )
-  if stroke != auto { data.stroke = stroke }
-  data
-}
-
-#let line-wasm(
-  id: "1",
-  color: gray,
-  index: auto,
-  optional: false,
-  features: (:),
-  default-features: (),
-  stroke: auto,
-  ..components,
-) = {
-  import "../wasm.typ": radishiom-wasm
-  let data = cbor(radishiom-wasm.construct_line(cbor.encode((
-    id: id,
-    index: index,
-    optional: optional,
-    features: features,
-    default-features: default-features,
     components: components.pos(),
-  ))))
-  data.color = color
-  data.stroke = stroke
-  data.metadata = components.named()
+    optional: optional,
+    features: features,
+    default-features: default-features,
+    stroke: stroke,
+    metadata: components.named(),
+  )
   data
 }

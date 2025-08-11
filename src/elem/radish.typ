@@ -186,3 +186,25 @@
 
   metro
 }
+
+#let radish(
+  metro,
+  features: (),
+  default-features: true,
+  all-features: false,
+  enable-all: false,
+  consider-disabled: false,
+) = {
+  import "../wasm.typ": radishiom-wasm
+  let data = cbor(radishiom-wasm.construct_radish(cbor.encode((
+    metro: metro,
+    features: features,
+    default-features: default-features,
+    all-features: all-features,
+    enable-all: enable-all,
+    consider-disabled: consider-disabled,
+  ))))
+  // todo: patch fields
+  // 怎么对应上station？
+  data
+}

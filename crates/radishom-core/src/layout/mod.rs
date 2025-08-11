@@ -1,3 +1,4 @@
+pub mod anchor;
 mod dir;
 pub mod positioning;
 

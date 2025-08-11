@@ -1,19 +1,24 @@
-use std::{collections::HashMap, ops::Range};
+use std::{collections::BTreeMap, ops::Range};
 
 use ecow::EcoString;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::{
+    feature::{FeatureCondition, FeatureMap, FeatureVec},
     layout::{WalkPos, positioning::extract_stations},
     math::Vec2,
-    model::{
-        Smart,
-        station::{StationId, StationV0, StationV1, StationV2},
-    },
+    model::station::{StationId, StationV0, StationV1, StationV2},
+    util::Smart,
 };
 
-#[derive(Clone, Eq, PartialEq, Hash, Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub struct LineId(EcoString);
+
+impl std::fmt::Display for LineId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
 
 // ===
 
@@ -23,14 +28,14 @@ pub struct LineV0 {
     pub id: LineId,
     pub index: Smart<i32>,
     pub optional: bool,
-    pub features: HashMap<EcoString, Vec<EcoString>>,
+    pub features: BTreeMap<EcoString, Vec<EcoString>>,
     pub default_features: Vec<EcoString>,
 
     pub components: Vec<LineComponent>,
 }
 
 #[derive(Deserialize)]
-#[serde(untagged)]
+#[serde(tag = "type")]
 pub enum LineComponent {
     Pin(Pin),
     Station(StationV0),
@@ -57,8 +62,6 @@ pub struct Pin {
 
 // ===
 
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
 pub struct LineV1 {
     pub id: LineId,
     pub index: Smart<i32>,
@@ -67,11 +70,30 @@ pub struct LineV1 {
     pub segments: Vec<Segment>,
     pub stations: Vec<StationV1>,
     pub ordered_stations: Vec<StationId>,
-    pub station_indexer: HashMap<StationId, usize>,
+    pub station_indexer: BTreeMap<StationId, usize>,
 
     pub optional: bool,
-    pub features: HashMap<EcoString, Vec<EcoString>>,
-    pub default_features: Vec<EcoString>,
+    pub features: FeatureMap,
+    pub default_features: FeatureVec,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub struct LineV2 {
+    pub id: LineId,
+    pub index: i32,
+
+    pub sections: Vec<Section>,
+    pub segments: Vec<Segment>,
+    pub stations: Vec<StationV2>,
+    pub ordered_stations: Vec<StationId>,
+    pub station_indexer: BTreeMap<StationId, usize>,
+
+    pub optional: bool,
+    pub features: FeatureMap,
+    pub default_features: FeatureVec,
+
+    pub disabled: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -79,8 +101,12 @@ pub struct LineV1 {
 pub struct Section {
     pub points: Vec<(Vec2, Option<f32>)>, // (point, corner_radius)
     pub cut: usize,
-    #[serde(flatten)]
-    pub attrs: AccumulatedAttrs,
+
+    pub reversed: bool,
+    pub layer: i32,
+    pub cfg: FeatureCondition,
+
+    pub disabled: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -90,40 +116,9 @@ pub struct Segment {
     pub end: Vec2,
     pub angle: f32,
     pub range: Range<usize>,
-    pub cfg: Option<EcoString>,
-    pub cfg_not: Option<EcoString>,
-}
+    pub cfg: FeatureCondition,
 
-#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct AccumulatedAttrs {
-    pub reversed: bool,
-    pub cfg: Option<EcoString>,
-    pub cfg_not: Option<EcoString>,
-    pub layer: i32,
-    pub stroke: Smart<EcoString>, // stub for comparison
-}
-
-impl AccumulatedAttrs {
-    pub fn from_pin(pin: &Pin) -> Self {
-        Self {
-            reversed: pin.reversed.unwrap_or(false),
-            cfg: pin.cfg.clone().unwrap_or(None),
-            cfg_not: pin.cfg_not.clone().unwrap_or(None),
-            layer: pin.layer.unwrap_or(0),
-            stroke: pin.stroke.clone(),
-        }
-    }
-
-    pub fn renewed(&self, pin: &Pin) -> Self {
-        Self {
-            reversed: pin.reversed.unwrap_or(self.reversed),
-            cfg: pin.cfg.clone().unwrap_or_else(|| self.cfg.clone()),
-            cfg_not: pin.cfg_not.clone().unwrap_or_else(|| self.cfg_not.clone()),
-            layer: pin.layer.unwrap_or(self.layer),
-            stroke: pin.stroke.clone().or_else(|| self.stroke.clone()),
-        }
-    }
+    pub disabled: bool,
 }
 
 impl LineV0 {
@@ -163,21 +158,51 @@ impl LineV1 {
     }
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct LineV2 {
-    pub id: LineId,
-    pub index: i32,
+impl LineV2 {
+    pub fn get_station(&self, station_id: &StationId) -> Option<&StationV2> {
+        self.station_indexer
+            .get(station_id)
+            .and_then(|idx| self.stations.get(*idx))
+    }
 
-    pub sections: Vec<Section>,
-    pub segments: Vec<Segment>,
-    pub stations: Vec<StationV2>,
-    pub ordered_stations: Vec<StationId>,
-    pub station_indexer: HashMap<StationId, usize>,
+    pub fn mark_terminuses(&mut self, consider_disabled: bool) {
+        let mut candidate_terminuses = Vec::new();
+        let mut j = 0;
+        while j < self.stations.len() {
+            while j < self.stations.len() && (!consider_disabled && self.stations[j].disabled) {
+                j += 1;
+            }
+            if j >= self.stations.len() {
+                break;
+            }
+            let first_enabled = j;
+            let mut last_enabled = j;
+            while j < self.stations.len()
+                && (consider_disabled || !self.segments[self.stations[j].segment].disabled)
+            {
+                last_enabled = j;
+                j += 1;
+                if self.stations[last_enabled].trunc {
+                    break;
+                }
+            }
 
-    pub optional: bool,
-    pub features: HashMap<EcoString, Vec<EcoString>>,
-    pub default_features: Vec<EcoString>,
+            candidate_terminuses.push(last_enabled);
+            if first_enabled != last_enabled && !self.stations[first_enabled].branch {
+                candidate_terminuses.push(first_enabled);
+            }
+
+            // set stations counted once as terminuses
+            let unique_terminuses = candidate_terminuses
+                .iter()
+                .filter(|&&x| candidate_terminuses.iter().filter(|&&y| y == x).count() == 1);
+            for &idx in unique_terminuses {
+                if !self.stations[idx].on_loop {
+                    self.stations[idx].terminal = true;
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]

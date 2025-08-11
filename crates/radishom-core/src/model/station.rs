@@ -1,11 +1,7 @@
 use ecow::EcoString;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::{
-    layout::Dir,
-    math::Vec2,
-    model::{Smart, line::LineId},
-};
+use crate::{feature::FeatureCondition, layout::Dir, math::Vec2, model::line::LineId, util::Smart};
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct StationId(EcoString);
@@ -14,13 +10,14 @@ pub struct StationId(EcoString);
 #[serde(rename_all = "kebab-case")]
 pub struct StationV0 {
     pub id: StationId,
+
     pub raw_pos: RawStationPos,
+    pub branch: bool,
     pub no_transfer: bool,
+    pub anchor: Smart<Dir>,
 
     pub cfg: Option<EcoString>,
     pub cfg_not: Option<EcoString>,
-
-    pub anchor: Smart<Dir>,
 }
 
 #[derive(Deserialize)]
@@ -32,8 +29,7 @@ pub struct RawStationPos {
     pub r: Smart<f32>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
+#[derive(Clone)]
 pub struct StationV1 {
     pub id: StationId,
 
@@ -41,14 +37,13 @@ pub struct StationV1 {
     pub segment: usize,
 
     pub pos: Smart<Vec2>,
+    pub branch: bool,
     pub on_loop: bool,
     pub trunc: bool,
     pub no_transfer: bool,
-
-    pub cfg: Option<EcoString>,
-    pub cfg_not: Option<EcoString>,
-
     pub anchor: Smart<Dir>,
+
+    pub cfg: FeatureCondition,
 }
 
 #[derive(Serialize)]
@@ -60,14 +55,16 @@ pub struct StationV2 {
     pub segment: usize,
 
     pub pos: Vec2,
+    pub branch: bool,
     pub on_loop: bool,
     pub trunc: bool,
     pub no_transfer: bool,
-
-    pub cfg: Option<EcoString>,
-    pub cfg_not: Option<EcoString>,
-
     pub anchor: Smart<Dir>,
+
+    pub cfg: FeatureCondition,
+
+    pub disabled: bool,
+    pub terminal: bool,
 }
 
 impl From<StationV1> for StationV2 {
@@ -76,13 +73,18 @@ impl From<StationV1> for StationV2 {
             id: value.id,
             line: value.line,
             segment: value.segment,
+
             pos: value.pos.unwrap_or_default(),
+            branch: value.branch,
             on_loop: value.on_loop,
             trunc: value.trunc,
             no_transfer: value.no_transfer,
-            cfg: value.cfg,
-            cfg_not: value.cfg_not,
+
+            cfg: value.cfg.clone(),
             anchor: value.anchor,
+
+            disabled: false,
+            terminal: false,
         }
     }
 }

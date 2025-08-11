@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 ecow.workspace = true
 indexmap.workspace = true
+itertools.workspace = true
 serde.workspace = true
 serde_derive.workspace = true
 

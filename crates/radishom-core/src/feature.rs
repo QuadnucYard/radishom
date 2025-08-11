@@ -1,6 +1,44 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use ecow::EcoString;
+use serde_derive::{Deserialize, Serialize};
+
+pub type FeatureVec = Vec<EcoString>;
+pub type FeatureSet = BTreeSet<EcoString>;
+pub type FeatureMap = BTreeMap<EcoString, Vec<EcoString>>;
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct FeatureCondition {
+    pub required: Option<EcoString>,
+    pub excluded: Option<EcoString>,
+}
+
+impl FeatureCondition {
+    pub fn is_enabled_by(&self, enabled_features: &FeatureSet) -> bool {
+        !self.is_disabled_by(enabled_features)
+    }
+
+    pub fn is_disabled_by(&self, enabled_features: &FeatureSet) -> bool {
+        self.required
+            .as_ref()
+            .is_some_and(|feat| !enabled_features.contains(feat))
+            || self
+                .excluded
+                .as_ref()
+                .is_some_and(|feat| enabled_features.contains(feat))
+    }
+}
+
+pub fn merge_features<T: Clone>(a: &[T], b: &[T]) -> Vec<T> {
+    let mut res = Vec::with_capacity(a.len() + b.len());
+    res.extend_from_slice(a);
+    res.extend_from_slice(b);
+    res
+}
+
+pub fn resolve_all_features(features: &FeatureMap) -> FeatureSet {
+    features.values().flatten().cloned().collect()
+}
 
 /// Resolves all dependent features for a given array of enabled features.
 ///
@@ -27,10 +65,10 @@ use ecow::EcoString;
 /// // Returns ["a", "b", "c", "d"] (order may vary)
 /// ```
 pub fn resolve_enabled_features(
-    features: &HashMap<EcoString, Vec<EcoString>>,
+    features: &FeatureMap,
     enabled_features: &[EcoString],
-) -> HashSet<EcoString> {
-    let mut all_enabled_features = HashSet::new();
+) -> FeatureSet {
+    let mut all_enabled_features = BTreeSet::new();
     let mut work_list = VecDeque::new();
 
     // Initialize with explicitly enabled features
@@ -60,7 +98,7 @@ mod tests {
 
     #[test]
     fn test_resolve_enabled_features() {
-        let mut features = HashMap::new();
+        let mut features = BTreeMap::new();
         features.insert("a".into(), vec!["b".into(), "c".into()]);
         features.insert("b".into(), vec!["d".into()]);
 

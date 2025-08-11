@@ -93,8 +93,9 @@ impl Serialize for Curve {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use serde_json;
+
+    use super::*;
 
     #[test]
     fn test_serialize_curv_ecomponent_simple() {

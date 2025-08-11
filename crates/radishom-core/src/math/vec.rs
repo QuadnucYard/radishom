@@ -141,8 +141,9 @@ impl<'de> Deserialize<'de> for Vec2 {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use serde_json;
+
+    use super::*;
 
     #[test]
     fn test_vec2_lerp() {

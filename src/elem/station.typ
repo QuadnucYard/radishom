@@ -54,7 +54,16 @@
   if id == auto {
     id = if type(name) == str { name } else { name.text }
   }
+
+  let extra = (:)
+  if hidden != false { extra.hidden = hidden }
+  if marker-pos != auto { extra.marker-pos = marker-pos }
+  if marker-offset != none { extra.marker-offset = marker-offset }
+  if label-pos != auto { extra.label-pos = label-pos }
+  if label-offset != none { extra.label-offset = label-offset }
+
   let data = (
+    type: "Station",
     id: id,
     name: name,
     raw-pos: (x: x, y: y, dx: dx, dy: dy, r: r),
@@ -62,14 +71,11 @@
     transfer: transfer,
     no-transfer: transfer == none,
     metadata: metadata,
+    branch: branch,
+    cfg: cfg,
+    cfg-not: cfg-not,
+    extra: extra,
   )
-  if hidden != false { data.hidden = hidden }
-  if branch != false { data.branch = branch }
-  if marker-pos != auto { data.marker-pos = marker-pos }
-  if marker-offset != none { data.marker-offset = marker-offset }
-  if label-pos != auto { data.label-pos = label-pos }
-  if label-offset != none { data.label-offset = label-offset }
-  if cfg != none { data.cfg = cfg }
-  if cfg-not != none { data.cfg-not = cfg-not }
+
   data
 }
