@@ -100,18 +100,19 @@
         continue
       }
       for p in sec.points {
-        min-x = calc.min(min-x, p.at(0))
-        min-y = calc.min(min-y, p.at(1))
-        max-x = calc.max(max-x, p.at(0))
-        max-y = calc.max(max-y, p.at(1))
+        let (px, py) = p.at(0)
+        min-x = calc.min(min-x, px)
+        max-x = calc.max(max-x, px)
+        min-y = calc.min(min-y, py)
+        max-y = calc.max(max-y, py)
       }
       let sec-par = (
         layer: sec.layer,
         stroke: sec.stroke,
         disabled: sec.disabled,
-        metadata: sec.metadata,
+        metadata: sec.at("metadata",default: (:)),
       )
-      let stroke = if sec.stroke != auto {
+      let stroke = if sec.stroke != auto and sec.stroke != "auto" {
         sec.stroke
       } else if line-stroker != none {
         line-stroker(line-par, sec-par)
@@ -141,11 +142,11 @@
       let hidden = sta.at("hidden", default: false) or is-not-first-transfer
 
       let pos = sta.pos
-      assert(pos != auto and pos.at(0) != auto)
-      min-x = calc.min(min-x, pos.at(0))
-      min-y = calc.min(min-y, pos.at(1))
-      max-x = calc.max(max-x, pos.at(0))
-      max-y = calc.max(max-y, pos.at(1))
+      assert(pos != auto and pos.at(0) != auto and pos.at(0) != "auto" and pos.at(1) != "auto")
+      // min-x = calc.min(min-x, pos.at(0))
+      // min-y = calc.min(min-y, pos.at(1))
+      // max-x = calc.max(max-x, pos.at(0))
+      // max-y = calc.max(max-y, pos.at(1))
 
       // extract transferred lines
       let tr-lines = if has-transfer {

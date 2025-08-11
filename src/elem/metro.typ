@@ -151,3 +151,18 @@
   mtr.lines = _resolve-stations(mtr)
   mtr
 }
+
+#let metro-wasm(lines, features: (:), default-features: ()) = {
+  import "../wasm.typ": radishiom-wasm
+  let data = cbor(radishiom-wasm.construct_metro(cbor.encode((
+    lines: lines
+  ))))
+  data.features = features
+  data.default-features = default-features
+  for line in lines {
+    data.lines.at(line.id).color = line.color
+    data.lines.at(line.id).stroke = line.stroke
+    data.lines.at(line.id).metadata = line.metadata
+  }
+  data
+}

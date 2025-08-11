@@ -4,8 +4,8 @@
 #let _zero-pos = (0, 0)
 
 #let _get-anchor-align(anchor) = {
-  let h-align = if "west" in anchor { left } else if "east" in anchor { right } else { center }
-  let v-align = if "north" in anchor { top } else if "south" in anchor { bottom } else { horizon }
+  let h-align = if "W" in anchor { left } else if "E" in anchor { right } else { center }
+  let v-align = if "N" in anchor { top } else if "S" in anchor { bottom } else { horizon }
   h-align + v-align
 }
 
@@ -114,13 +114,13 @@
   }
 
   let curve-points = for (i, pt) in points.enumerate() {
-    if type(pt.at(0)) == array {
+    if type(pt.at(0)) == array and pt.at(1) != none {
       let (pt, radius) = pt
       let p1 = extract(points.at(i - 1))
       let p2 = extract(points.at(i + 1))
       _round-corner(pt, p1, p2, radius, u)
     } else {
-      let (x, y) = pt
+      let (x, y) = pt.at(0)
       if i == 0 {
         (curve.move((x * u, y * -u)),)
       } else {
@@ -204,7 +204,8 @@
         place(curve(..curve-points, stroke: line-stroke))
       }
     } else {
-      place(curve(..curve-points, stroke: line.stroke))
+      let stroke = if line.stroke == "auto" { auto } else { line.stroke }
+      place(curve(..curve-points, stroke: stroke))
     }
   }
 

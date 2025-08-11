@@ -100,6 +100,7 @@
 /// -> angle
 #let get-preferred-angle(angles) = {
   let angles = for angle in angles {
+    let angle = angle * 1rad
     if angle <= -90deg { angle += 180deg }
     if angle > 90deg { angle -= 180deg }
     (angle,)

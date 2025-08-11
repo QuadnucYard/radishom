@@ -21,7 +21,7 @@
     return circle-marker
   }
   if tr-lines.len() == 2 {
-    let angle = station.metadata.at("marker-rotation", default: none)
+    let angle = station.at("metadata", default: (:)).at("marker-rotation", default: none)
     if angle == none {
       let angles = for (line2, sta2) in tr-lines.zip(tr-stations) {
         (line2.segments.at(sta2.segment).angle,)

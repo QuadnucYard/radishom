@@ -12,5 +12,5 @@
 #let label-renderer(station) = {
   show: block.with(inset: (x: 0.5em, y: 0.5em))
 
-  [#station.name]
+  [#station.at("name", default: [Unknown])]
 }

@@ -21,7 +21,7 @@
   for line in lines.values() {
     if line.disabled { continue }
     for station in line.stations {
-      if not station.disabled and station.transfer != none {
+      if not station.disabled and not station.no-transfer {
         if station.id not in station-collection {
           station-collection.insert(station.id, ())
         }
@@ -135,8 +135,8 @@
         not enable-all
           and (
             line.segments.at(sta.segment).disabled
-              or "cfg" in sta and not enabled-features.contains(sta.cfg)
-              or "cfg-not" in sta and enabled-features.contains(sta.cfg-not)
+              or "cfg" in sta and sta.cfg != none and not enabled-features.contains(sta.cfg)
+              or "cfg-not" in sta and sta.cfg-not != none and enabled-features.contains(sta.cfg-not)
           )
       )
     }

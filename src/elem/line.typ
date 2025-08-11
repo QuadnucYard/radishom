@@ -308,3 +308,28 @@
   if stroke != auto { data.stroke = stroke }
   data
 }
+
+#let line-wasm(
+  id: "1",
+  color: gray,
+  index: auto,
+  optional: false,
+  features: (:),
+  default-features: (),
+  stroke: auto,
+  ..components,
+) = {
+  import "../wasm.typ": radishiom-wasm
+  let data = cbor(radishiom-wasm.construct_line(cbor.encode((
+    id: id,
+    index: index,
+    optional: optional,
+    features: features,
+    default-features: default-features,
+    components: components.pos(),
+  ))))
+  data.color = color
+  data.stroke = stroke
+  data.metadata = components.named()
+  data
+}

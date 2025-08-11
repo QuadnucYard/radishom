@@ -1,14 +1,14 @@
 
 /// Cardinal and intercardinal direction constants.
 #let dirs = (
-  N: "north",
-  S: "south",
-  W: "west",
-  E: "east",
-  NW: "north-west",
-  NE: "north-east",
-  SW: "south-west",
-  SE: "south-east",
+  N: "N",
+  S: "S",
+  W: "W",
+  E: "E",
+  NW: "NW",
+  NE: "NE",
+  SW: "SW",
+  SE: "SE",
 )
 
 /// Resolves the final position of a segment end point based on given parameters.

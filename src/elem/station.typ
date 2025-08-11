@@ -22,7 +22,7 @@
 /// - cfg (str, none): Enabling conditions for this station
 /// - cfg-not (str, none): Disabling conditions for this station
 ///
-/// - anchor (auto, vec2): Text anchor point position
+/// - anchor (auto, str): Text anchor point position
 /// - marker-pos (auto, vec2): Custom marker position
 /// - marker-offset (vec2, none): Fine-tune marker placement
 /// - label-pos (auto, vec2): Custom label position
@@ -60,6 +60,7 @@
     raw-pos: (x: x, y: y, dx: dx, dy: dy, r: r),
     anchor: anchor,
     transfer: transfer,
+    no-transfer: transfer == none,
     metadata: metadata,
   )
   if hidden != false { data.hidden = hidden }

@@ -1,0 +1,16 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.dependencies]
+radishom-core = { path = "crates/radishom-core" }
+radishom-draw = { path = "crates/radishom-draw" }
+
+ciborium = "0.2"
+ecow = { version = "0.2", features = ["serde"] }
+indexmap = { version = "2", features = ["serde"] }
+itertools = "0.14"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+typst-wasm-protocol = "0.0.2"
