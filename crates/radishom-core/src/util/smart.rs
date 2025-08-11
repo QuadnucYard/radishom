@@ -226,37 +226,37 @@ mod tests {
     }
 
     #[test]
-    fn test_roundtrip_auto() {
+    fn test_auto() {
         let smart: Smart<i32> = Smart::Auto;
         roundtrip(smart, "\"auto\"");
     }
 
     #[test]
-    fn test_roundtrip_custom_int() {
+    fn test_custom_int() {
         let smart = Smart::Custom(42);
         roundtrip(smart, "42");
     }
 
     #[test]
-    fn test_roundtrip_custom_bool() {
+    fn test_custom_bool() {
         let smart = Smart::Custom(true);
         roundtrip(smart, "true");
     }
 
     #[test]
-    fn test_roundtrip_custom_float() {
+    fn test_custom_float() {
         let smart = Smart::Custom(1.14);
         roundtrip(smart, "1.14");
     }
 
     #[test]
-    fn test_roundtrip_custom_vec() {
+    fn test_custom_vec() {
         let smart = Smart::Custom(vec![1, 2, 3]);
         roundtrip(smart, "[1,2,3]");
     }
 
     #[test]
-    fn test_roundtrip_custom_map() {
+    fn test_custom_map() {
         let mut map = std::collections::BTreeMap::new();
         map.insert("a".to_string(), 1);
         map.insert("b".to_string(), 2);
@@ -265,13 +265,26 @@ mod tests {
     }
 
     #[test]
-    fn test_roundtrip_custom_option_some() {
-        let smart = Smart::Custom(Some(1));
-        roundtrip(smart, "1");
+    fn test_custom_enum() {
+        #[derive(Debug, PartialEq, Eq, serde_derive::Deserialize, serde_derive::Serialize)]
+        enum MyEnum {
+            A,
+            B,
+            C,
+        }
+
+        let smart = Smart::Custom(MyEnum::B);
+        roundtrip(smart, "\"B\"");
     }
 
     #[test]
-    fn test_roundtrip_custom_option_none() {
+    fn test_custom_option_some() {
+        let smart = Smart::Custom(Some("666".to_string()));
+        roundtrip(smart, "\"666\"");
+    }
+
+    #[test]
+    fn test_custom_option_none() {
         let smart = Smart::Custom(Option::<i32>::None);
         roundtrip(smart, "null");
     }
