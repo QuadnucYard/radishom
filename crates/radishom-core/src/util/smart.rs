@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use serde::de::{self, Deserialize, Deserializer};
 use serde_derive::Deserialize;
 
@@ -180,7 +182,7 @@ impl<'de> Deserialize<'de> for AutoLiteral {
     {
         // Try to deserialize a string - if it's exactly "auto" accept,
         // otherwise return an error so the untagged enum will try the next variant.
-        let s = <&str>::deserialize(deserializer)?;
+        let s: Cow<'de, str> = Deserialize::deserialize(deserializer)?;
         if s == "auto" {
             Ok(AutoLiteral)
         } else {
@@ -214,6 +216,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use ciborium::cbor;
+
     use super::*;
 
     fn roundtrip<T>(value: T, expected_json: &str)
@@ -224,6 +228,17 @@ mod tests {
         assert_eq!(json, expected_json);
         assert_eq!(serde_json::from_str::<T>(&json).unwrap(), value);
     }
+
+    // fn roundtrip_cbor<T>(value: T, expected: &ciborium::Value)
+    // where
+    //     T: std::fmt::Debug + PartialEq + serde::Serialize + for<'a> serde::Deserialize<'a>,
+    // {
+    //     let mut buf = Vec::new();
+    //     ciborium::into_writer(&value, &mut buf).unwrap();
+    //     let json = serde_json::to_string(&value).unwrap();
+    //     assert_eq!(json, expected_json);
+    //     assert_eq!(serde_json::from_str::<T>(&json).unwrap(), value);
+    // }
 
     #[test]
     fn test_auto() {
@@ -287,5 +302,40 @@ mod tests {
     fn test_custom_option_none() {
         let smart = Smart::Custom(Option::<i32>::None);
         roundtrip(smart, "null");
+    }
+
+    #[test]
+    fn test_cbor() {
+        let value = cbor!("none").unwrap();
+        let smart: Smart<Option<String>> = value.deserialized().unwrap();
+        assert_eq!(smart, Smart::Custom(Some("none".to_string())));
+    }
+
+    #[test]
+    fn test_cbor00() {
+        let value = cbor!("auto").unwrap();
+        let smart: AutoLiteral = value.deserialized().unwrap();
+    }
+
+    #[test]
+    fn test_cbor0() {
+        let value = cbor!("auto").unwrap();
+        println!("{value:#?}");
+        let smart: Smart<String> = value.deserialized().unwrap();
+        assert_eq!(smart, Smart::Auto);
+    }
+
+    #[test]
+    fn test_cbor2() {
+        let value = cbor!("auto").unwrap();
+        let smart: Smart<Option<String>> = value.deserialized().unwrap();
+        assert_eq!(smart, Smart::Auto);
+    }
+
+    #[test]
+    fn test_cbor3() {
+        let value = cbor!(null).unwrap();
+        let smart: Smart<Option<String>> = value.deserialized().unwrap();
+        assert_eq!(smart, Smart::Custom(None));
     }
 }
