@@ -5,14 +5,16 @@ edition = "2024"
 
 [dependencies]
 radishom-core.workspace = true
-
+serde_json.workspace = true
 ciborium.workspace = true
 typst-wasm-protocol.workspace = true
 # wasm-minimal-protocol = { git = "https://github.com/astrale-sharp/wasm-minimal-protocol" }
-glam = "*"
+
+serde_path_to_error = "0.1"
 
 [lib]
 crate-type = ["cdylib"]
+test = false
 
 [package.metadata]
 wasm-default-target = "wasm32-unknown-unknown"

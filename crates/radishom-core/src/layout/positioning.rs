@@ -57,6 +57,7 @@ pub(crate) fn extract_stations(
         };
         let target_pos = match cur_pin.loop_target.as_ref() {
             Some(Smart::Custom(loop_target)) => {
+                // TODO: loop_target handling: if a specified loop_target station id is never found, indexing stations[start_station_index] will panic. Add a check to fall back to start_pos or error out gracefully.
                 while start_station_index < stations.len()
                     && stations[start_station_index].id != *loop_target
                 {
@@ -313,15 +314,16 @@ pub(crate) fn resolve_stations_final_pos(
                         .unwrap_or(seg.end);
 
                     // now next_known_idx is the first known position after last_known_idx
-                    for (k, sta) in stations[last_known_idx..next_known_idx]
-                        .iter_mut()
-                        .enumerate()
-                    {
-                        sta.pos = Smart::Custom(last_known.lerp(
-                            next_known,
-                            (k - last_known_idx + compensate) as f32
-                                / (next_known_idx - last_known_idx + compensate) as f32,
-                        ));
+                    let run_len = next_known_idx.saturating_sub(last_known_idx);
+                    // If there are autos to interpolate
+                    if run_len > 0 {
+                        for (offset, sta) in stations[last_known_idx..next_known_idx]
+                            .iter_mut()
+                            .enumerate()
+                        {
+                            let t = (offset + compensate) as f32 / (run_len + compensate) as f32;
+                            sta.pos = Smart::Custom(last_known.lerp(next_known, t));
+                        }
                     }
                     // FIXME - problems
 

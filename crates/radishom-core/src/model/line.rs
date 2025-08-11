@@ -177,29 +177,37 @@ impl LineV2 {
             }
             let first_enabled = j;
             let mut last_enabled = j;
+            // advance through a run of stations whose segments are considered enabled
+            let mut advanced = false;
             while j < self.stations.len()
                 && (consider_disabled || !self.segments[self.stations[j].segment].disabled)
             {
                 last_enabled = j;
                 j += 1;
+                advanced = true;
                 if self.stations[last_enabled].trunc {
                     break;
                 }
+            }
+            // if no progress was made (e.g., segment disabled while consider_disabled == false),
+            // advance j by one to avoid getting stuck on the same element
+            if !advanced {
+                j += 1;
             }
 
             candidate_terminuses.push(last_enabled);
             if first_enabled != last_enabled && !self.stations[first_enabled].branch {
                 candidate_terminuses.push(first_enabled);
             }
+        }
 
-            // set stations counted once as terminuses
-            let unique_terminuses = candidate_terminuses
-                .iter()
-                .filter(|&&x| candidate_terminuses.iter().filter(|&&y| y == x).count() == 1);
-            for &idx in unique_terminuses {
-                if !self.stations[idx].on_loop {
-                    self.stations[idx].terminal = true;
-                }
+        // set stations counted once as terminuses
+        let unique_terminuses = candidate_terminuses
+            .iter()
+            .filter(|&&x| candidate_terminuses.iter().filter(|&&y| y == x).count() == 1);
+        for &idx in unique_terminuses {
+            if !self.stations[idx].on_loop {
+                self.stations[idx].terminal = true;
             }
         }
     }

@@ -3,8 +3,12 @@ use typst_wasm_protocol::wasm_export;
 
 #[wasm_export]
 pub fn construct_radish(data: &[u8]) -> Result<Vec<u8>, String> {
-    let input: RadishV0 =
-        ciborium::from_reader(data).map_err(|e| format!("Failed to deserialize: {e}"))?;
+    let value: ciborium::Value = ciborium::from_reader(data).unwrap();
+    let j = serde_json::to_string(&value).unwrap();
+    let jd = &mut serde_json::Deserializer::from_str(&j);
+    let result: RadishV0 =
+        serde_path_to_error::deserialize(jd).map_err(|e| format!("Failed to deserialize: {e}"))?;
+    let input = result;
     let output = input.resolve();
     let mut buf = Vec::new();
     ciborium::into_writer(&output, &mut buf).map_err(|e| format!("Failed to serialize: {e}"))?;
