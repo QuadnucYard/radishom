@@ -5,7 +5,7 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::{
     feature::{FeatureCondition, FeatureMap, FeatureVec},
-    layout::{WalkPos, positioning::extract_stations},
+    layout::{WalkPos, extract::extract_stations},
     math::Vec2,
     model::station::{StationId, StationV0, StationV1, StationV2},
     util::Smart,

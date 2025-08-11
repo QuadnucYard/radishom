@@ -1,7 +1,13 @@
 use ecow::EcoString;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::{feature::FeatureCondition, layout::Dir, math::Vec2, model::line::LineId, util::Smart};
+use crate::{
+    feature::FeatureCondition,
+    layout::Dir,
+    math::{FloatExt, Vec2},
+    model::line::LineId,
+    util::Smart,
+};
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct StationId(EcoString);
@@ -85,6 +91,33 @@ impl From<StationV1> for StationV2 {
 
             disabled: false,
             terminal: false,
+        }
+    }
+}
+
+impl RawStationPos {
+    pub fn resolve_between(&self, current_pos: Vec2, target_pos: Vec2) -> Smart<Vec2> {
+        let x = match (self.x, self.dx, self.r, self.y) {
+            (Smart::Custom(x), _, _, _) => Smart::Custom(x),
+            (_, Smart::Custom(dx), _, _) => Smart::Custom(current_pos.x + dx),
+            (_, _, Smart::Custom(r), _) => Smart::Custom(current_pos.x.lerp(target_pos.x, r)),
+            (_, _, _, Smart::Custom(y)) => {
+                Smart::Custom(current_pos.interpolate_x_for_y(target_pos, y))
+            }
+            _ => Smart::Auto,
+        };
+        let y = match (self.y, self.dy, self.r, self.x) {
+            (Smart::Custom(y), _, _, _) => Smart::Custom(y),
+            (_, Smart::Custom(dy), _, _) => Smart::Custom(current_pos.y + dy),
+            (_, _, Smart::Custom(r), _) => Smart::Custom(current_pos.y.lerp(target_pos.y, r)),
+            (_, _, _, Smart::Custom(x)) => {
+                Smart::Custom(current_pos.interpolate_y_for_x(target_pos, x))
+            }
+            _ => Smart::Auto,
+        };
+        match (x, y) {
+            (Smart::Custom(x), Smart::Custom(y)) => Smart::Custom(Vec2::new(x, y)),
+            _ => Smart::Auto,
         }
     }
 }
