@@ -1,5 +1,6 @@
-use std::{borrow::Cow, collections::BTreeSet};
+use std::collections::BTreeSet;
 
+use ecow::eco_format;
 use indexmap::IndexMap;
 use serde_derive::{Deserialize, Serialize};
 
@@ -16,11 +17,11 @@ use crate::{
 
 #[derive(Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct RadishV0<'a> {
-    pub metro: MetroV0<'a>,
+pub struct RadishV0 {
+    pub metro: MetroV0,
 
     /// Enabled features
-    pub features: FeatureVec<'a>,
+    pub features: FeatureVec,
     /// Whether to include default features
     pub default_features: bool,
     /// Whether to include all features (unimplemented)
@@ -33,12 +34,12 @@ pub struct RadishV0<'a> {
 
 #[derive(Serialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct RadishV1<'a> {
-    pub metro: MetroV1<'a>,
-    pub enabled_transfers: Transfers<'a>,
+pub struct RadishV1 {
+    pub metro: MetroV1,
+    pub enabled_transfers: Transfers,
 
     /// Enabled features
-    pub features: FeatureVec<'a>,
+    pub features: FeatureVec,
     /// Whether to include default features
     pub default_features: bool,
     /// Whether to include all features (unimplemented)
@@ -49,8 +50,8 @@ pub struct RadishV1<'a> {
     pub consider_disabled: bool,
 }
 
-impl<'a> RadishV0<'a> {
-    pub fn resolve(self) -> RadishV1<'a> {
+impl RadishV0 {
+    pub fn resolve(self) -> RadishV1 {
         let mut metro = self.metro.resolve();
 
         let global_enabled_features = if self.all_features {
@@ -75,12 +76,12 @@ impl<'a> RadishV0<'a> {
                 resolve_enabled_features(&line.features, &global_enabled_features)
             });
 
-            let line_feat_id = Cow::Owned(format!("L:{}", line.id));
+            let line_feat_id = eco_format!("L:{}", line.id);
 
             line.disabled =
                 !self.enable_all && line.optional && !enabled_features.contains(&line_feat_id);
             if !line.disabled && !enabled_features.contains(&line_feat_id) {
-                enabled_features.insert(line_feat_id);
+                enabled_features.insert(line_feat_id.clone());
             }
 
             if !self.enable_all {
@@ -116,10 +117,7 @@ impl<'a> RadishV0<'a> {
     }
 }
 
-fn resolve_pending_station_attrs<'a>(
-    lines: &mut IndexMap<LineId<'a>, LineV2<'a>>,
-    transfers: &Transfers<'a>,
-) {
+fn resolve_pending_station_attrs(lines: &mut IndexMap<LineId, LineV2>, transfers: &Transfers) {
     let mut pending = Vec::new();
     for line in lines.values() {
         for (j, station) in line.stations.iter().enumerate() {

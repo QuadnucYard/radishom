@@ -10,17 +10,14 @@ use crate::{
     util::Smart,
 };
 
-pub struct StationResolution<'a> {
-    pub stations: Vec<StationV1<'a>>,
-    pub ordered_stations: Vec<StationId<'a>>,
-    pub sections: Vec<Section<'a>>,
-    pub segments: Vec<Segment<'a>>,
+pub struct StationResolution {
+    pub stations: Vec<StationV1>,
+    pub ordered_stations: Vec<StationId>,
+    pub sections: Vec<Section>,
+    pub segments: Vec<Segment>,
 }
 
-pub fn extract_stations<'a>(
-    components: Vec<LineComponent<'a>>,
-    line_id: LineId<'a>,
-) -> StationResolution<'a> {
+pub fn extract_stations(components: Vec<LineComponent>, line_id: LineId) -> StationResolution {
     let Some(LineComponent::Pin(last_pin)) = components.first() else {
         panic!("The points must start with a pin!");
     };
@@ -217,16 +214,16 @@ pub fn extract_stations<'a>(
 }
 
 #[derive(Clone, PartialEq, Eq)]
-struct AccumulatedAttrs<'a> {
+struct AccumulatedAttrs {
     pub reversed: bool,
-    pub cfg: Option<Feature<'a>>,
-    pub cfg_not: Option<Feature<'a>>,
+    pub cfg: Option<Feature>,
+    pub cfg_not: Option<Feature>,
     pub layer: i32,
     pub stroke: Smart<EcoString>, // stub for comparison
 }
 
-impl<'a> AccumulatedAttrs<'a> {
-    pub fn from_pin(pin: &Pin<'a>) -> Self {
+impl AccumulatedAttrs {
+    pub fn from_pin(pin: &Pin) -> Self {
         Self {
             reversed: pin.reversed.unwrap_or(false),
             cfg: match pin.cfg.as_ref() {
@@ -244,7 +241,7 @@ impl<'a> AccumulatedAttrs<'a> {
         }
     }
 
-    pub fn renewed(&self, pin: &Pin<'a>) -> Self {
+    pub fn renewed(&self, pin: &Pin) -> Self {
         Self {
             reversed: pin.reversed.unwrap_or(self.reversed),
             cfg: match pin.cfg.as_ref() {

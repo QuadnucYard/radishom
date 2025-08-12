@@ -10,10 +10,10 @@ use crate::{
     util::Smart,
 };
 
-pub(crate) fn resolve_stations_final_pos<'a>(
-    lines: Vec<LineV1<'a>>,
-    transfers: &Transfers<'a>,
-) -> IndexMap<LineId<'a>, LineV2<'a>> {
+pub(crate) fn resolve_stations_final_pos(
+    lines: Vec<LineV1>,
+    transfers: &Transfers,
+) -> IndexMap<LineId, LineV2> {
     // todo: reduce allocations
     lines
         .iter()

@@ -1,22 +1,20 @@
-use std::{
-    borrow::Cow,
-    collections::{BTreeMap, BTreeSet, VecDeque},
-};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
+use ecow::EcoString;
 use serde_derive::{Deserialize, Serialize};
 
-pub type Feature<'a> = Cow<'a, str>;
-pub type FeatureVec<'a> = Vec<Feature<'a>>;
-pub type FeatureSet<'a> = BTreeSet<Feature<'a>>;
-pub type FeatureMap<'a> = BTreeMap<Feature<'a>, Vec<Feature<'a>>>;
+pub type Feature = EcoString;
+pub type FeatureVec = Vec<Feature>;
+pub type FeatureSet = BTreeSet<Feature>;
+pub type FeatureMap = BTreeMap<Feature, Vec<Feature>>;
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct FeatureCondition<'a> {
-    pub required: Option<Feature<'a>>,
-    pub excluded: Option<Feature<'a>>,
+pub struct FeatureCondition {
+    pub required: Option<Feature>,
+    pub excluded: Option<Feature>,
 }
 
-impl<'a> FeatureCondition<'a> {
+impl FeatureCondition {
     pub fn is_enabled_by(&self, enabled_features: &FeatureSet) -> bool {
         !self.is_disabled_by(enabled_features)
     }
@@ -39,7 +37,7 @@ pub fn merge_features<T: Clone>(a: &[T], b: &[T]) -> Vec<T> {
     res
 }
 
-pub fn resolve_all_features<'a>(features: &FeatureMap<'a>) -> FeatureSet<'a> {
+pub fn resolve_all_features(features: &FeatureMap) -> FeatureSet {
     features.values().flatten().cloned().collect()
 }
 
@@ -67,10 +65,7 @@ pub fn resolve_all_features<'a>(features: &FeatureMap<'a>) -> FeatureSet<'a> {
 /// let result = resolve_enabled_features(&features, &enabled);
 /// // Returns ["a", "b", "c", "d"] (order may vary)
 /// ```
-pub fn resolve_enabled_features<'a>(
-    features: &FeatureMap<'a>,
-    enabled_features: &[Feature<'a>],
-) -> FeatureSet<'a> {
+pub fn resolve_enabled_features(features: &FeatureMap, enabled_features: &[Feature]) -> FeatureSet {
     let mut all_enabled_features = BTreeSet::new();
     let mut work_list = VecDeque::new();
 
