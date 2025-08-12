@@ -9,8 +9,9 @@ pub fn construct_radish(data: &[u8]) -> Result<Vec<u8>, String> {
     // let jd = &mut serde_json::Deserializer::from_str(&j);
     // let result: RadishV0 =
     //     serde_path_to_error::deserialize(jd).map_err(|e| format!("Failed to deserialize: {e}"))?;
-    let input: RadishV0 =
-        ciborium::from_reader(data).map_err(|e| format!("Failed to deserialize: {e}"))?;
+    let mut buf = vec![0u8; 256 * 1024];
+    let input: RadishV0 = ciborium::from_reader_with_buffer(data, &mut buf)
+        .map_err(|e| format!("Failed to deserialize: {e}"))?;
     let output = input.resolve();
     encode(&output)
 }
