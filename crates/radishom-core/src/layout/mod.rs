@@ -1,6 +1,6 @@
 pub mod anchor;
 mod dir;
-pub mod extract;
 pub mod positioning;
+pub mod extract;
 
 pub use dir::{Dir, WalkPos};

@@ -1,10 +1,10 @@
-use std::{borrow::Cow, collections::BTreeMap, ops::Range};
+use std::{collections::BTreeMap, ops::Range};
 
 use ecow::EcoString;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::{
-    feature::{Feature, FeatureCondition, FeatureMap, FeatureVec},
+    feature::{FeatureCondition, FeatureMap, FeatureVec},
     layout::{WalkPos, extract::extract_stations},
     math::Vec2,
     model::station::{StationId, StationV0, StationV1, StationV2},
@@ -12,9 +12,9 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub struct LineId<'a>(Cow<'a, str>);
+pub struct LineId(EcoString);
 
-impl std::fmt::Display for LineId<'_> {
+impl std::fmt::Display for LineId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
     }
@@ -24,38 +24,38 @@ impl std::fmt::Display for LineId<'_> {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct LineV0<'a> {
-    pub id: LineId<'a>,
+pub struct LineV0 {
+    pub id: LineId,
     pub index: Smart<i32>,
     pub optional: bool,
-    pub features: FeatureMap<'a>,
-    pub default_features: FeatureVec<'a>,
+    pub features: BTreeMap<EcoString, Vec<EcoString>>,
+    pub default_features: Vec<EcoString>,
 
-    pub components: Vec<LineComponent<'a>>,
+    pub components: Vec<LineComponent>,
 }
 
 #[derive(Deserialize)]
 #[serde(tag = "type")]
-pub enum LineComponent<'a> {
-    Pin(Pin<'a>),
-    Station(StationV0<'a>),
+pub enum LineComponent {
+    Pin(Pin),
+    Station(StationV0),
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct Pin<'a> {
+pub struct Pin {
     pub raw_pos: Option<WalkPos>,
 
     pub end: bool,
     #[serde(default)]
-    pub loop_target: Option<Smart<StationId<'a>>>,
+    pub loop_target: Option<Smart<StationId>>,
     pub reversed: Smart<bool>,
     pub reverse_before: bool,
 
     // pub cfg: Smart<Option<EcoString>>,
     // pub cfg_not: Smart<Option<EcoString>>,
-    pub cfg: Option<Smart<Feature<'a>>>,
-    pub cfg_not: Option<Smart<Feature<'a>>>,
+    pub cfg: Option<Smart<EcoString>>,
+    pub cfg_not: Option<Smart<EcoString>>,
 
     pub layer: Smart<i32>,
     pub corner_radius: Option<f32>,
@@ -64,67 +64,67 @@ pub struct Pin<'a> {
 
 // ===
 
-pub struct LineV1<'a> {
-    pub id: LineId<'a>,
+pub struct LineV1 {
+    pub id: LineId,
     pub index: Smart<i32>,
 
-    pub sections: Vec<Section<'a>>,
-    pub segments: Vec<Segment<'a>>,
-    pub stations: Vec<StationV1<'a>>,
-    pub ordered_stations: Vec<StationId<'a>>,
-    pub station_indexer: BTreeMap<StationId<'a>, usize>,
+    pub sections: Vec<Section>,
+    pub segments: Vec<Segment>,
+    pub stations: Vec<StationV1>,
+    pub ordered_stations: Vec<StationId>,
+    pub station_indexer: BTreeMap<StationId, usize>,
 
     pub optional: bool,
-    pub features: FeatureMap<'a>,
-    pub default_features: FeatureVec<'a>,
+    pub features: FeatureMap,
+    pub default_features: FeatureVec,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct LineV2<'a> {
-    pub id: LineId<'a>,
+pub struct LineV2 {
+    pub id: LineId,
     pub index: i32,
 
-    pub sections: Vec<Section<'a>>,
-    pub segments: Vec<Segment<'a>>,
-    pub stations: Vec<StationV2<'a>>,
-    pub ordered_stations: Vec<StationId<'a>>,
-    pub station_indexer: BTreeMap<StationId<'a>, usize>,
+    pub sections: Vec<Section>,
+    pub segments: Vec<Segment>,
+    pub stations: Vec<StationV2>,
+    pub ordered_stations: Vec<StationId>,
+    pub station_indexer: BTreeMap<StationId, usize>,
 
     pub optional: bool,
-    pub features: FeatureMap<'a>,
-    pub default_features: FeatureVec<'a>,
+    pub features: FeatureMap,
+    pub default_features: FeatureVec,
 
     pub disabled: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct Section<'a> {
+pub struct Section {
     pub points: Vec<(Vec2, Option<f32>)>, // (point, corner_radius)
     pub cut: usize,
 
     pub reversed: bool,
     pub layer: i32,
-    pub cfg: FeatureCondition<'a>,
+    pub cfg: FeatureCondition,
 
     pub disabled: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct Segment<'a> {
+pub struct Segment {
     pub start: Vec2,
     pub end: Vec2,
     pub angle: f32,
     pub range: Range<usize>,
-    pub cfg: FeatureCondition<'a>,
+    pub cfg: FeatureCondition,
 
     pub disabled: bool,
 }
 
-impl<'a> LineV0<'a> {
-    pub fn resolve(self) -> LineV1<'a> {
+impl LineV0 {
+    pub fn resolve(self) -> LineV1 {
         let res = extract_stations(self.components, self.id.clone());
         let station_indexer = res
             .stations
@@ -148,19 +148,19 @@ impl<'a> LineV0<'a> {
     }
 }
 
-impl<'a> LineV1<'a> {
-    pub fn get_segment(&self, segment_index: usize) -> Option<&Segment<'a>> {
+impl LineV1 {
+    pub fn get_segment(&self, segment_index: usize) -> Option<&Segment> {
         self.segments.get(segment_index)
     }
 
-    pub fn get_station(&self, station_id: &StationId) -> Option<&StationV1<'a>> {
+    pub fn get_station(&self, station_id: &StationId) -> Option<&StationV1> {
         self.station_indexer
             .get(station_id)
             .and_then(|idx| self.stations.get(*idx))
     }
 }
 
-impl<'a> LineV2<'a> {
+impl LineV2 {
     pub fn get_station(&self, station_id: &StationId) -> Option<&StationV2> {
         self.station_indexer
             .get(station_id)

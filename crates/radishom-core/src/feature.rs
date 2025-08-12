@@ -1,22 +1,19 @@
-use std::{
-    borrow::Cow,
-    collections::{BTreeMap, BTreeSet, VecDeque},
-};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
+use ecow::EcoString;
 use serde_derive::{Deserialize, Serialize};
 
-pub type Feature<'a> = Cow<'a, str>;
-pub type FeatureVec<'a> = Vec<Feature<'a>>;
-pub type FeatureSet<'a> = BTreeSet<Feature<'a>>;
-pub type FeatureMap<'a> = BTreeMap<Feature<'a>, Vec<Feature<'a>>>;
+pub type FeatureVec = Vec<EcoString>;
+pub type FeatureSet = BTreeSet<EcoString>;
+pub type FeatureMap = BTreeMap<EcoString, Vec<EcoString>>;
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct FeatureCondition<'a> {
-    pub required: Option<Feature<'a>>,
-    pub excluded: Option<Feature<'a>>,
+pub struct FeatureCondition {
+    pub required: Option<EcoString>,
+    pub excluded: Option<EcoString>,
 }
 
-impl<'a> FeatureCondition<'a> {
+impl FeatureCondition {
     pub fn is_enabled_by(&self, enabled_features: &FeatureSet) -> bool {
         !self.is_disabled_by(enabled_features)
     }
@@ -39,7 +36,7 @@ pub fn merge_features<T: Clone>(a: &[T], b: &[T]) -> Vec<T> {
     res
 }
 
-pub fn resolve_all_features<'a>(features: &FeatureMap<'a>) -> FeatureSet<'a> {
+pub fn resolve_all_features(features: &FeatureMap) -> FeatureSet {
     features.values().flatten().cloned().collect()
 }
 
@@ -67,10 +64,10 @@ pub fn resolve_all_features<'a>(features: &FeatureMap<'a>) -> FeatureSet<'a> {
 /// let result = resolve_enabled_features(&features, &enabled);
 /// // Returns ["a", "b", "c", "d"] (order may vary)
 /// ```
-pub fn resolve_enabled_features<'a>(
-    features: &FeatureMap<'a>,
-    enabled_features: &[Cow<'a, str>],
-) -> FeatureSet<'a> {
+pub fn resolve_enabled_features(
+    features: &FeatureMap,
+    enabled_features: &[EcoString],
+) -> FeatureSet {
     let mut all_enabled_features = BTreeSet::new();
     let mut work_list = VecDeque::new();
 
@@ -111,7 +108,7 @@ mod tests {
             .collect::<Vec<_>>();
         result.sort(); // For deterministic testing
 
-        let expected: Vec<Cow<str>> = vec!["a".into(), "b".into(), "c".into(), "d".into()];
+        let expected: Vec<EcoString> = vec!["a".into(), "b".into(), "c".into(), "d".into()];
 
         assert_eq!(result, expected);
     }

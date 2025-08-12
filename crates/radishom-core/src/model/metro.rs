@@ -10,25 +10,25 @@ use crate::{
 
 #[derive(Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct MetroV0<'a> {
-    pub lines: Vec<LineV0<'a>>,
+pub struct MetroV0 {
+    pub lines: Vec<LineV0>,
 
-    pub features: FeatureMap<'a>,
-    pub default_features: FeatureVec<'a>,
+    pub features: FeatureMap,
+    pub default_features: FeatureVec,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct MetroV1<'a> {
-    pub lines: IndexMap<LineId<'a>, LineV2<'a>>,
-    pub transfers: Transfers<'a>,
+pub struct MetroV1 {
+    pub lines: IndexMap<LineId, LineV2>,
+    pub transfers: Transfers,
 
-    pub features: FeatureMap<'a>,
-    pub default_features: FeatureVec<'a>,
+    pub features: FeatureMap,
+    pub default_features: FeatureVec,
 }
 
-impl<'a> MetroV0<'a> {
-    pub fn resolve(self) -> MetroV1<'a> {
+impl MetroV0 {
+    pub fn resolve(self) -> MetroV1 {
         let lines = self
             .lines
             .into_iter()

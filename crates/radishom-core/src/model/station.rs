@@ -1,5 +1,4 @@
-use std::borrow::Cow;
-
+use ecow::EcoString;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::{
@@ -11,20 +10,20 @@ use crate::{
 };
 
 #[derive(Clone, Eq, PartialEq, Hash, Debug, PartialOrd, Ord, Serialize, Deserialize)]
-pub struct StationId<'a>(Cow<'a, str>);
+pub struct StationId(EcoString);
 
 #[derive(Deserialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct StationV0<'a> {
-    pub id: StationId<'a>,
+pub struct StationV0 {
+    pub id: StationId,
 
     pub raw_pos: RawStationPos,
     pub branch: bool,
     pub no_transfer: bool,
     pub anchor: Smart<Dir>,
 
-    pub cfg: Option<Cow<'a, str>>,
-    pub cfg_not: Option<Cow<'a, str>>,
+    pub cfg: Option<EcoString>,
+    pub cfg_not: Option<EcoString>,
 }
 
 #[derive(Deserialize)]
@@ -37,10 +36,10 @@ pub struct RawStationPos {
 }
 
 #[derive(Clone)]
-pub struct StationV1<'a> {
-    pub id: StationId<'a>,
+pub struct StationV1 {
+    pub id: StationId,
 
-    pub line: LineId<'a>,
+    pub line: LineId,
     pub segment: usize,
 
     pub pos: Smart<Vec2>,
@@ -50,15 +49,15 @@ pub struct StationV1<'a> {
     pub no_transfer: bool,
     pub anchor: Smart<Dir>,
 
-    pub cfg: FeatureCondition<'a>,
+    pub cfg: FeatureCondition,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "kebab-case")]
-pub struct StationV2<'a> {
-    pub id: StationId<'a>,
+pub struct StationV2 {
+    pub id: StationId,
 
-    pub line: LineId<'a>,
+    pub line: LineId,
     pub segment: usize,
 
     pub pos: Vec2,
@@ -68,14 +67,14 @@ pub struct StationV2<'a> {
     pub no_transfer: bool,
     pub anchor: Smart<Dir>,
 
-    pub cfg: FeatureCondition<'a>,
+    pub cfg: FeatureCondition,
 
     pub disabled: bool,
     pub terminal: bool,
 }
 
-impl<'a> From<StationV1<'a>> for StationV2<'a> {
-    fn from(value: StationV1<'a>) -> Self {
+impl From<StationV1> for StationV2 {
+    fn from(value: StationV1) -> Self {
         Self {
             id: value.id,
             line: value.line,
