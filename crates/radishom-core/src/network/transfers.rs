@@ -7,9 +7,9 @@ use crate::model::{
     station::StationId,
 };
 
-pub type Transfers = BTreeMap<StationId, Vec<LineId>>;
+pub type Transfers<'a> = BTreeMap<StationId<'a>, Vec<LineId<'a>>>;
 
-pub fn resolve_transfers(lines: &[LineV1]) -> Transfers {
+pub fn resolve_transfers<'a>(lines: &[LineV1<'a>]) -> Transfers<'a> {
     let mut station_collection = Transfers::new();
 
     for line in lines {
@@ -22,7 +22,7 @@ pub fn resolve_transfers(lines: &[LineV1]) -> Transfers {
     keep_(station_collection)
 }
 
-pub fn resolve_enabled_transfers(lines: &IndexMap<LineId, LineV2>) -> Transfers {
+pub fn resolve_enabled_transfers<'a>(lines: &IndexMap<LineId<'a>, LineV2<'a>>) -> Transfers<'a> {
     let mut station_collection = Transfers::new();
 
     for line in lines.values() {
