@@ -2,7 +2,7 @@ use ecow::EcoString;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::{
-    feature::FeatureCondition,
+    feature::{Feature, FeatureCondition},
     layout::Dir,
     math::{FloatExt, Vec2},
     model::line::LineId,
@@ -22,8 +22,8 @@ pub struct StationV0 {
     pub no_transfer: bool,
     pub anchor: Smart<Dir>,
 
-    pub cfg: Option<EcoString>,
-    pub cfg_not: Option<EcoString>,
+    pub cfg: Option<Feature>,
+    pub cfg_not: Option<Feature>,
 }
 
 #[derive(Deserialize)]

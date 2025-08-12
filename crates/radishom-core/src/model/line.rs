@@ -4,7 +4,7 @@ use ecow::EcoString;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::{
-    feature::{FeatureCondition, FeatureMap, FeatureVec},
+    feature::{Feature, FeatureCondition, FeatureMap, FeatureVec},
     layout::{WalkPos, extract::extract_stations},
     math::Vec2,
     model::station::{StationId, StationV0, StationV1, StationV2},
@@ -28,8 +28,8 @@ pub struct LineV0 {
     pub id: LineId,
     pub index: Smart<i32>,
     pub optional: bool,
-    pub features: BTreeMap<EcoString, Vec<EcoString>>,
-    pub default_features: Vec<EcoString>,
+    pub features: FeatureMap,
+    pub default_features: FeatureVec,
 
     pub components: Vec<LineComponent>,
 }
@@ -52,10 +52,10 @@ pub struct Pin {
     pub reversed: Smart<bool>,
     pub reverse_before: bool,
 
-    // pub cfg: Smart<Option<EcoString>>,
-    // pub cfg_not: Smart<Option<EcoString>>,
-    pub cfg: Option<Smart<EcoString>>,
-    pub cfg_not: Option<Smart<EcoString>>,
+    // pub cfg: Smart<Option<Feature>>,
+    // pub cfg_not: Smart<Option<Feature>>,
+    pub cfg: Option<Smart<Feature>>,
+    pub cfg_not: Option<Smart<Feature>>,
 
     pub layer: Smart<i32>,
     pub corner_radius: Option<f32>,

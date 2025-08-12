@@ -214,8 +214,9 @@ enum SmartHelper<T> {
 //     }
 // }
 
-use serde::de::{IntoDeserializer, MapAccess, SeqAccess, Visitor};
 use std::{fmt, marker::PhantomData};
+
+use serde::de::{IntoDeserializer, MapAccess, SeqAccess, Visitor};
 impl<'de, T> Deserialize<'de> for Smart<T>
 where
     T: Deserialize<'de>,

@@ -1,7 +1,7 @@
 use ecow::EcoString;
 
 use crate::{
-    feature::FeatureCondition,
+    feature::{Feature, FeatureCondition},
     math::Vec2,
     model::{
         line::{LineComponent, LineId, Pin, Section, Segment},
@@ -216,8 +216,8 @@ pub fn extract_stations(components: Vec<LineComponent>, line_id: LineId) -> Stat
 #[derive(Clone, PartialEq, Eq)]
 struct AccumulatedAttrs {
     pub reversed: bool,
-    pub cfg: Option<EcoString>,
-    pub cfg_not: Option<EcoString>,
+    pub cfg: Option<Feature>,
+    pub cfg_not: Option<Feature>,
     pub layer: i32,
     pub stroke: Smart<EcoString>, // stub for comparison
 }

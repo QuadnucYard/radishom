@@ -3,14 +3,15 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use ecow::EcoString;
 use serde_derive::{Deserialize, Serialize};
 
-pub type FeatureVec = Vec<EcoString>;
-pub type FeatureSet = BTreeSet<EcoString>;
-pub type FeatureMap = BTreeMap<EcoString, Vec<EcoString>>;
+pub type Feature = EcoString;
+pub type FeatureVec = Vec<Feature>;
+pub type FeatureSet = BTreeSet<Feature>;
+pub type FeatureMap = BTreeMap<Feature, Vec<Feature>>;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FeatureCondition {
-    pub required: Option<EcoString>,
-    pub excluded: Option<EcoString>,
+    pub required: Option<Feature>,
+    pub excluded: Option<Feature>,
 }
 
 impl FeatureCondition {
@@ -64,10 +65,7 @@ pub fn resolve_all_features(features: &FeatureMap) -> FeatureSet {
 /// let result = resolve_enabled_features(&features, &enabled);
 /// // Returns ["a", "b", "c", "d"] (order may vary)
 /// ```
-pub fn resolve_enabled_features(
-    features: &FeatureMap,
-    enabled_features: &[EcoString],
-) -> FeatureSet {
+pub fn resolve_enabled_features(features: &FeatureMap, enabled_features: &[Feature]) -> FeatureSet {
     let mut all_enabled_features = BTreeSet::new();
     let mut work_list = VecDeque::new();
 
@@ -108,7 +106,7 @@ mod tests {
             .collect::<Vec<_>>();
         result.sort(); // For deterministic testing
 
-        let expected: Vec<EcoString> = vec!["a".into(), "b".into(), "c".into(), "d".into()];
+        let expected: Vec<Feature> = vec!["a".into(), "b".into(), "c".into(), "d".into()];
 
         assert_eq!(result, expected);
     }
