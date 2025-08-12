@@ -52,8 +52,10 @@ pub struct Pin {
     pub reversed: Smart<bool>,
     pub reverse_before: bool,
 
-    pub cfg: Smart<Option<EcoString>>,
-    pub cfg_not: Smart<Option<EcoString>>,
+    // pub cfg: Smart<Option<EcoString>>,
+    // pub cfg_not: Smart<Option<EcoString>>,
+    pub cfg: Option<Smart<EcoString>>,
+    pub cfg_not: Option<Smart<EcoString>>,
 
     pub layer: Smart<i32>,
     pub corner_radius: Option<f32>,

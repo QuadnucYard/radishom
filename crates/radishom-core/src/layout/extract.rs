@@ -226,8 +226,16 @@ impl AccumulatedAttrs {
     pub fn from_pin(pin: &Pin) -> Self {
         Self {
             reversed: pin.reversed.unwrap_or(false),
-            cfg: pin.cfg.clone().unwrap_or(None),
-            cfg_not: pin.cfg_not.clone().unwrap_or(None),
+            cfg: match pin.cfg.as_ref() {
+                Some(Smart::Auto) => None,
+                Some(Smart::Custom(t)) => Some(t.clone()),
+                None => None,
+            },
+            cfg_not: match pin.cfg_not.as_ref() {
+                Some(Smart::Auto) => None,
+                Some(Smart::Custom(t)) => Some(t.clone()),
+                None => None,
+            },
             layer: pin.layer.unwrap_or(0),
             stroke: pin.stroke.clone(),
         }
@@ -236,8 +244,16 @@ impl AccumulatedAttrs {
     pub fn renewed(&self, pin: &Pin) -> Self {
         Self {
             reversed: pin.reversed.unwrap_or(self.reversed),
-            cfg: pin.cfg.clone().unwrap_or_else(|| self.cfg.clone()),
-            cfg_not: pin.cfg_not.clone().unwrap_or_else(|| self.cfg_not.clone()),
+            cfg: match pin.cfg.as_ref() {
+                Some(Smart::Auto) => self.cfg.clone(),
+                Some(Smart::Custom(t)) => Some(t.clone()),
+                None => None,
+            },
+            cfg_not: match pin.cfg_not.as_ref() {
+                Some(Smart::Auto) => self.cfg.clone(),
+                Some(Smart::Custom(t)) => Some(t.clone()),
+                None => None,
+            },
             layer: pin.layer.unwrap_or(self.layer),
             stroke: pin.stroke.clone().or_else(|| self.stroke.clone()),
         }

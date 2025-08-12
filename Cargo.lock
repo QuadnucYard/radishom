@@ -132,6 +132,7 @@ dependencies = [
 name = "radishom-core"
 version = "0.1.0"
 dependencies = [
+ "ciborium",
  "ecow",
  "indexmap",
  "itertools",
@@ -156,6 +157,7 @@ version = "0.1.0"
 dependencies = [
  "ciborium",
  "radishom-core",
+ "serde",
  "serde_json",
  "serde_path_to_error",
  "typst-wasm-protocol",
